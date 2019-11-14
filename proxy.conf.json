@@ -1,0 +1,15 @@
+{
+  "/api": {
+    "target": "http://localhost:8080/routing/find-route",
+    "pathRewrite": {
+      "^/api": ""
+    }
+  },
+  "/traffic": {
+    "target": "https://atlas.wsv.bund.de/elwis/rest/nts/messages/",
+    "secure": false,
+    "pathRewrite": {
+      "^/traffic": ""
+    }
+  }
+}

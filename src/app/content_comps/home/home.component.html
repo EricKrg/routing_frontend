@@ -1,0 +1,24 @@
+<div class="row" style="height: 100%">
+  <div class="col" style="padding:0">
+    <app-map></app-map>
+  </div>
+  <div class="col-3 side-bar">
+    <div class="container">
+      <br>
+      <div *ngFor="let o of reqArray; let i = index" class="input-group input-group-sm mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="inputGroup-sizing-sm">ID</span>
+        </div>
+        <input type="text" class="form-control" [(ngModel)] = 'reqArray[i].id' >
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-sm">KM</span>
+          </div>
+          <input type="number" class="form-control" [(ngModel)] = 'reqArray[i].km'>
+      </div>
+      <button type="button" class="btn btn-dark" (click)="addStop()">Add</button>
+
+
+      <button type="button" class="btn btn-danger" (click)="findRoute()">Find Route</button>
+    </div>
+  </div>
+</div>
