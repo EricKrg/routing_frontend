@@ -6,6 +6,7 @@ import { map } from 'rxjs/operators';
 import { LocatorService } from './locator.service';
 import { DatePipe } from '@angular/common';
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -76,15 +77,12 @@ export class DataFetcherService {
   }
 
 
-  getRoute(body: object):void {// Observable<any> {
+  getRoute(body: object, params: String):void {// Observable<any> {
     console.log("get route")
     console.log( JSON.stringify(body));
-    this.http.post('/api',JSON.stringify(body), {
+    this.http.post('/api'+ params,JSON.stringify(body), {
               headers: { 'Content-Type': 'application/json' }}).
     subscribe((res) => this.connectionResponse.emit(res));
-    /*pipe(
-      map(res => res as JSON)
-    );*/
   }
 
 

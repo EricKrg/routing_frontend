@@ -1,11 +1,24 @@
 /* You can add global styles to this file, and also import other style files */
 @import '~bootstrap/dist/css/bootstrap.min.css';
-
+@import "~ng-pick-datetime/assets/style/picker.min.css";
 .leaflet-routing-alternatives-container .leaflet-routing-alt .leaflet-touch .leaflet-control-layers, .leaflet-touch .leaflet-bar {
     display: none;
 }
 
 html { overflow-y: hidden; }
+
+mat-form-field {
+    width: 100%;
+	}
+	
+.mat-form-field-infix {
+	display: block;
+	position: relative;
+	flex: auto;
+	min-width: 0;
+	width: auto !important;
+	/* width: 180px; */
+}
 
 .main-section{
 	width:80%;
@@ -77,3 +90,5 @@ html { overflow-y: hidden; }
 .dashbord-skyblue .detail-section{
 	background-color:#803D9B;
 }
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

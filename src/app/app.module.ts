@@ -11,6 +11,10 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ModuleWithProviders } from '@angular/compiler/src/core';
 import { LocatorService } from './locator.service';
 import { DatePipe } from '@angular/common';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { OwlDateTimeModule, OwlNativeDateTimeModule } from 'ng-pick-datetime';
+import { MaterialModule } from 'src/matiral-module';
+
 
 @NgModule({
   declarations: [
@@ -20,9 +24,14 @@ import { DatePipe } from '@angular/common';
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     AppRoutingModule,
     HttpClientModule,
-    FormsModule
+    FormsModule,
+    OwlDateTimeModule, 
+    OwlNativeDateTimeModule,
+    MaterialModule
+ 
   ],
   providers: [DataFetcherService, LocatorService, DatePipe],
   bootstrap: [AppComponent]

@@ -5,24 +5,54 @@
   <div class="col-3 side-bar">
     <div class="container">
       <br>
-      <div *ngFor="let o of reqArray; let i = index" class="input-group input-group-sm mb-3">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="inputGroup-sizing-sm">ID</span>
-        </div>
-        <input type="text" class="form-control" [(ngModel)]='reqArray[i].id'>
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="inputGroup-sizing-sm">KM</span>
-        </div>
-        <input type="number" class="form-control" [(ngModel)]='reqArray[i].km'>
-      </div>
-      <div class="container">
-        <div class="btn-group btn-group-sm" role="group">
-          <button type="button" class="btn btn-dark" (click)="addStop()">Add</button>
-          <button type="button" class="btn btn-dark" (click)="removeStop()">remove</button>
-        </div>
-      </div>
-      <br>
-      <button type="button" class="btn btn-danger" (click)="findRoute()">Find Route</button>
+      <mat-card class="example-card">
+        <mat-card-header>
+          <div mat-card-avatar class="example-header-image"></div>
+          <mat-card-title>Routing controll</mat-card-title>
+          <mat-card-subtitle>DWRM</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngFor="let o of reqArray; let i = index">
+            <table style="width: 100%;">
+              <td>
+                <mat-form-field>
+                  <input matInput placeholder="ID" maxlength="4" type="text"
+                    [(ngModel)]='reqArray[i].id'>
+                </mat-form-field>
+              </td>
+              <td>
+                <mat-form-field>
+                  <input matInput placeholder="KM" type="number" [(ngModel)]='reqArray[i].km'>
+                </mat-form-field>
+              </td>
+              <td>
+                <div class="input-group-prepend">
+                  <button mat-icon-button (click)="removeStop(i)" color="warn">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </table>
+          </div>
+          <div class="container">
+            <mat-form-field>
+              <div class="button-row container">
+                <button mat-mini-fab (click)="addStop()" color="primary">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
+            </mat-form-field>
+          </div>
+          <div class="conatiner">
+            <input matInput [(ngModel)]="selectedMoment" [owlDateTime]="dt1" [owlDateTimeTrigger]="dt1" placeholder="Date Time">
+            <owl-date-time #dt1></owl-date-time>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button type="button" class="btn btn-danger" (click)="findRoute()">Find Route</button>
+        </mat-card-actions>
+      </mat-card>
+
     </div>
   </div>
 </div>

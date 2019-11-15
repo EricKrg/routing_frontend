@@ -4,13 +4,8 @@ import {
   CRS, Layer, GeoJSON, layerGroup, FeatureGroup, LayerGroup, LeafletMouseEvent, popup, circleMarker, TileLayer, latLngBounds,
   LatLng, GeoJSONOptions, SVG
 } from 'leaflet';
-
-import 'leaflet-routing-machine';
 import { LocatorService } from '../locator.service';
 import { DataFetcherService } from '../data-fetcher.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { fcall } from 'q';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 declare var L: Leaflet;
 
@@ -41,10 +36,19 @@ export class MapComponent implements OnInit {
     maxZoom: 19
   });
 
+  hydda: TileLayer = tileLayer('https://{s}.tile.openstreetmap.se/hydda/full/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: 'Tiles courtesy of <a href="http://openstreetmap.se/" target="_blank">OpenStreetMap Sweden</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  });
+
+  wmsLayer: TileLayer = tileLayer.wms('https://atlas.wsv.bund.de/bwastr/wms?', {
+    layers: 'Gewaessernetz', format: "image/png", transparent: "true"
+  })
+
   baseMaps: any = {
     'light': this.cartoDB_Voyager,
     'dark': this.cartoDB_DarkMatter,
-
+    'water': this.hydda
   };
 
   overlayMaps: any = {
@@ -67,13 +71,10 @@ export class MapComponent implements OnInit {
     this.map = this.map = map('map', {
       center: [52.5, 13.4],
       zoom: 14,
-      /*maxZoom: 14,
-      minZoom: 6,*/
-      renderer: L.canvas({ padding: 0.5 }),
-      /*new SVG({
-        padding: 1
-      }),*/
-      layers: [this.cartoDB_Voyager, this.geojsonLayers, this.routeLayers, this.tracker]
+      preferCanvas: true,
+      maxZoom: 14,
+      minZoom: 6,
+      layers: [this.cartoDB_Voyager, this.wmsLayer, this.geojsonLayers, this.routeLayers, this.tracker]
     });
     control.layers(this.baseMaps).addTo(this.map);
 
@@ -98,30 +99,46 @@ export class MapComponent implements OnInit {
       const layerStyle: object = {
         style: function (feature) {
           switch (feature.properties.messageType) {
-            case 'INFORMATION': return { color: "#2EC4B6", weight: 5 };
-            case 'OBSTRUCTION': return { color: "#FF9F1C", weight: 4 };
-            case 'WARNING': return { color: "#E5L.geoJSON(lines, layerStyle).addTo(this.map);5934", weight: 3 };
-            case 'LOCKING': return { color: "#E71D36", weight: 5 };
+            case 'INFORMATION': return { color: "#2EC4B6", weight: 3, opacity: 0.5, smoothFactor: 1 };
+            case 'OBSTRUCTION': return { color: "#FF9F1C", weight: 3, opacity: 0.6, smoothFactor: 1 };
+            case 'WARNING': return { color: "#E55934", weight: 3, opacity: 0.8, smoothFactor: 1 };
+            case 'LOCKING': return { color: "#E71D36", weight: 3, opacity: 0.8, smoothFactor: 1 };
           }
         }
-      }
-      this.trafficInfo = res["ntsMessages"]["FTM"]
-      let trafficPoints = []//{ type: "FeatureCollection", features: []  };
+      };
+      const outline: object = {
+        style: function (feature) {
+          return { color: "#fff", weight: 6 };
+
+        }
+      };
+
+      this.trafficInfo = res["ntsMessages"]["FTM"];
+      let trafficPoints = [];
       let lines = { type: "FeatureCollection", features: [] };
+      let linesSimple = []
       for (const feature of this.trafficInfo.features) {
         if (feature.geometry.type === "Point") {
-          //feature.geometry.coordinates = [feature.geometry.coordinates[1],feature.geometry.coordinates[0]]
-          //circle([feature.geometry.coordinates[1],feature.geometry.coordinates[0]],20).addTo(this.map)
-          //L.geoJSON(feature).addTo(this.map);    
           trafficPoints.push(feature);
         } else {
+          // create a small offset
+          let offset = 0.0001;
+          switch (feature.properties.messageType) {
+            case 'INFORMATION': offset = 0.0009;
+            case 'OBSTRUCTION': offset = 0.0004;
+            case 'WARNING': offset = 0.0002;
+            case 'LOCKING': offset = 0.0001;
+          }
+          feature.geometry.geometries[2].coordinates = feature.geometry.geometries[2].coordinates.
+            map((value) => { return [value[0] - offset, value[1] + offset]});
+          feature.geometry = feature.geometry.geometries[2]
           lines.features.push(feature);
+          linesSimple.push(feature.geometry);
         }
       }
-      console.log(this.trafficInfo)
-      console.log(lines)
-      console.log(trafficPoints)
+      L.geoJSON(linesSimple, outline).addTo(this.map);
       L.geoJSON(lines, layerStyle).addTo(this.map);
+
       L.geoJson(trafficPoints, {
         /*
          * When each feature is loaded from the GeoJSON this
@@ -155,9 +172,9 @@ export class MapComponent implements OnInit {
 
           }
           if (feature.properties.delay) {
-            return { color: "#293a80", weight: 5 };
+            return { color: "#ff7e67", weight: 10 };
           }
-          return { dashArray: "3", weight: 2 };
+          return { color: "#ff7e67",dashArray: "3", weight: 2 };
 
         }
       }
@@ -166,8 +183,7 @@ export class MapComponent implements OnInit {
           return { color: "#fff", weight: 4 };
 
         }
-      }
-      console.log(segments)
+      };
       let circles = [];
       let c; let p;
       for (const seg of segments) {
@@ -178,10 +194,10 @@ export class MapComponent implements OnInit {
           radius: 50
         });
         p = new L.Popup({ autoClose: false, closeOnClick: false })
-                .setContent("<small><b>"+new Date(seg["time"]).toLocaleDateString() + "</b><br>" +
-                            new Date(seg["time"]).toLocaleTimeString()+ "</small>")
-                .setLatLng(avgCoords);
-        c.bindPopup(p).openPopup()
+          .setContent("<small><b>" + new Date(seg["time"]).toLocaleDateString() + "</b><br>" +
+            new Date(seg["time"]).toLocaleTimeString() + "</small>")
+          .setLatLng(avgCoords);
+        c.bindPopup(p).openPopup();
         circles.push(c);
       }
       const routeOutline = L.geoJSON(this.route, outline);
@@ -189,13 +205,13 @@ export class MapComponent implements OnInit {
       routeOutline.addTo(this.routeLayers);
       routeLayer.addTo(this.routeLayers);
       let i = 0;
-      circles.forEach((c) =>{
-         c.addTo(this.routeLayers)
-         if(i === 0) c.openPopup()
-         if(i === Math.trunc(circles.length/ 2)) c.openPopup()
-         if(i === circles.length - 1) c.openPopup()
-         i++;
-        });
+      circles.forEach((c) => {
+        c.addTo(this.routeLayers)
+        if (i === 0) { c.openPopup(); }
+        if (i === Math.trunc(circles.length / 2)) { c.openPopup(); }
+        if (i === circles.length - 1) { c.openPopup(); }
+        i++;
+      });
       this.map.fitBounds(routeLayer.getBounds())
     });
 

@@ -3,3 +3,10 @@
     width: 100%;
     top: -8px;
 }
+
+.my_polyline { 
+    stroke: green;
+    fill: none;
+    stroke-dasharray: 10,10; 
+    stroke-width: 5;  
+  }

@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { DataFetcherService } from 'src/app/data-fetcher.service';
+import { DatePipe } from '@angular/common';
+import { FormGroup, FormBuilder } from '@angular/forms';
 
 interface requestObj {
   id: string;
@@ -25,9 +27,14 @@ export class HomeComponent implements OnInit {
     { id: "3101", km: 100 },
     { id: "0701", km: 650 },
   ];
+  selectedMoment: Date;
+  vType: String = "FSF";
+
   constructor(
-    private dataFetcher: DataFetcherService
-  ) { }
+    private dataFetcher: DataFetcherService,
+    private datePipe: DatePipe,
+  ) {
+   }
 
   ngOnInit() {
     console.log(this.reqArray)
@@ -37,8 +44,8 @@ export class HomeComponent implements OnInit {
     this.reqArray.push({ id: "to", km: 0 })
   }
 
-  removeStop(): void {
-    this.reqArray.pop();
+  removeStop(i:number): void {
+    this.reqArray.splice(i, 1);
   }
 
   buildRequest(): object {
@@ -50,8 +57,9 @@ export class HomeComponent implements OnInit {
     };
     let bodyArr: requestBody[] = [];
     let pointsArr: requestObj[] = [];
-    let j: number = 0; let i: number = 0;
-    
+
+    let j: number = 0;
+    let i: number = 0;
     for (const obj of this.reqArray) {
       pointsArr.push(obj);
       if (j > 0 && j < this.reqArray.length-1) {
@@ -77,12 +85,19 @@ export class HomeComponent implements OnInit {
       }
       i = i + 1;
     }
-  
     return bodyArr;
   }
 
   findRoute(): void {
-    this.dataFetcher.getRoute(this.buildRequest());
+    let params: string = "?";
+    console.log(this.vType)
+    if (this.selectedMoment !== undefined) {
+      let time =  this.datePipe.transform(this.selectedMoment, 'yyyy-MM-dd-HH-mm').toString()
+      console.log(time)
+      params += "time="+time
+    }
+    console.log(params)
+    this.dataFetcher.getRoute(this.buildRequest(), params);
   }
 
 
