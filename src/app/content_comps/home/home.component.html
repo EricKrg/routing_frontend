@@ -9,15 +9,19 @@
         <div class="input-group-prepend">
           <span class="input-group-text" id="inputGroup-sizing-sm">ID</span>
         </div>
-        <input type="text" class="form-control" [(ngModel)] = 'reqArray[i].id' >
+        <input type="text" class="form-control" [(ngModel)]='reqArray[i].id'>
         <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroup-sizing-sm">KM</span>
-          </div>
-          <input type="number" class="form-control" [(ngModel)] = 'reqArray[i].km'>
+          <span class="input-group-text" id="inputGroup-sizing-sm">KM</span>
+        </div>
+        <input type="number" class="form-control" [(ngModel)]='reqArray[i].km'>
       </div>
-      <button type="button" class="btn btn-dark" (click)="addStop()">Add</button>
-
-
+      <div class="container">
+        <div class="btn-group btn-group-sm" role="group">
+          <button type="button" class="btn btn-dark" (click)="addStop()">Add</button>
+          <button type="button" class="btn btn-dark" (click)="removeStop()">remove</button>
+        </div>
+      </div>
+      <br>
       <button type="button" class="btn btn-danger" (click)="findRoute()">Find Route</button>
     </div>
   </div>

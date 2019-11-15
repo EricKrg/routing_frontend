@@ -67,8 +67,9 @@ export class DataFetcherService {
   getTraffic(): Observable<any> {
     let startDate: Date = new Date();
     let endDate: Date = new Date(startDate.setMonth(startDate.getMonth() + 1 ));
-    let dateString: String = 'dateFrom/' + this.datePipe.transform(startDate, 'yyyy-MM-dd').toString() +
+    let dateString: String = 'dateFrom/' + this.datePipe.transform(new Date(), 'yyyy-MM-dd').toString() +
                              '/dateTo/' + this.datePipe.transform(endDate, 'yyyy-MM-dd').toString();
+    console.log(dateString)
     return this.http.get('/traffic' + dateString).pipe(
       map(res => res as JSON)
     );
@@ -80,7 +81,7 @@ export class DataFetcherService {
     console.log( JSON.stringify(body));
     this.http.post('/api',JSON.stringify(body), {
               headers: { 'Content-Type': 'application/json' }}).
-    subscribe((res) => this.connectionResponse.emit(res.route));
+    subscribe((res) => this.connectionResponse.emit(res));
     /*pipe(
       map(res => res as JSON)
     );*/
