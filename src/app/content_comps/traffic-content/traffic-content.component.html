@@ -1,0 +1,26 @@
+<mat-accordion>
+    <mat-expansion-panel class="content-comp" *ngIf="show()" [ngStyle]="style" expanded="true" hideToggle>
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                {{content.messageType}}
+            </mat-panel-title>
+            <mat-panel-description>
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+        <p>
+            <b>{{content.limLimitationCode}}/{{content.reason}} </b></p>
+        <p>{{showDate()}}</p>
+        <div class="scroll">
+            <p><small>{{content.contents}}</small></p>
+        </div>
+
+        <mat-action-row>
+            <button mat-icon-button (click)="toFeature()">
+                <mat-icon>zoom_in</mat-icon>
+            </button>
+            <button mat-icon-button (click)="onClose()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </mat-action-row>     
+    </mat-expansion-panel>
+</mat-accordion>
