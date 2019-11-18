@@ -2,12 +2,22 @@ import { Component, OnInit, EventEmitter } from '@angular/core';
 import {
   latLng, Leaflet, tileLayer, map, Map, locationfound, geoJSON, polygon, circle, Path, DomEvent, DomUtil, control, InteractiveLayerOptions,
   CRS, Layer, GeoJSON, layerGroup, FeatureGroup, LayerGroup, LeafletMouseEvent, popup, circleMarker, TileLayer, latLngBounds,
-  LatLng, GeoJSONOptions, SVG
+  LatLng, GeoJSONOptions, SVG, Tooltip
 } from 'leaflet';
 import { LocatorService } from '../locator.service';
 import { DataFetcherService } from '../data-fetcher.service';
 
 declare var L: Leaflet;
+
+function getColor(type: String): String {
+  switch (type) {
+    case 'INFORMATION': return "#2EC4B6";
+    case 'OBSTRUCTION': return "#FF9F1C";
+    case 'WARNING': return "#E55934";
+    case 'LOCKING': return "#E71D36";
+    default: return "#f75f00"
+  }
+}
 
 @Component({
   selector: 'app-map',
@@ -19,9 +29,30 @@ export class MapComponent implements OnInit {
   private pos: number[];
   private geojsonLayers: LayerGroup = layerGroup();
   private routeLayers: LayerGroup = layerGroup();
+  private trafficLayers: LayerGroup = layerGroup();
+  private activeTrafficLayer: LayerGroup = layerGroup();
+  private toolTipLayer: LayerGroup = layerGroup();
   private tracker: LayerGroup = layerGroup();
   private route;
   private trafficInfo;
+
+  // layerstyles
+  layerStyle: object = {
+    style: function (feature) {
+      return {
+        color: getColor(feature.properties.messageType),
+        weight: 3, opacity: 0.8, smoothFactor: 1
+      };
+    }
+  };
+  outline: object = {
+    style: function () {
+      return { color: "#fff", weight: 6 };
+
+    }
+  };
+
+  hoverStyle: object = { weight: 16, radius: 14 };
 
 
   // base maps
@@ -68,13 +99,14 @@ export class MapComponent implements OnInit {
 
   ngOnInit(): void {
     // inital map creation
-    this.map = this.map = map('map', {
+    this.map = map('map', {
       center: [52.5, 13.4],
       zoom: 14,
       preferCanvas: true,
       maxZoom: 14,
       minZoom: 6,
-      layers: [this.cartoDB_Voyager, this.wmsLayer, this.geojsonLayers, this.routeLayers, this.tracker]
+      layers: [this.cartoDB_Voyager, this.wmsLayer,
+      this.activeTrafficLayer, this.geojsonLayers, this.routeLayers, this.tracker, this.toolTipLayer]
     });
     control.layers(this.baseMaps).addTo(this.map);
 
@@ -90,29 +122,111 @@ export class MapComponent implements OnInit {
       this.tracker.clearLayers();
     });
 
+    this.getTrafficInfo();
+    // listens to map clicks, zooms and highlights feature
+    this.getActiveTrafficInfo();
 
-    this.datafetcher.hoverPos.subscribe((res: any) => {
-      this.map.setView([res.lat, res.lon], 12);
-    });
+    this.datafetcher.connectionResponse.subscribe((res: any) => {
+      this.routeLayers.clearLayers();
+      this.toolTipLayer.clearLayers();
 
-    this.datafetcher.getTraffic().subscribe((res: any) => {
-      const layerStyle: object = {
-        style: function (feature) {
-          switch (feature.properties.messageType) {
-            case 'INFORMATION': return { color: "#2EC4B6", weight: 3, opacity: 0.5, smoothFactor: 1 };
-            case 'OBSTRUCTION': return { color: "#FF9F1C", weight: 3, opacity: 0.6, smoothFactor: 1 };
-            case 'WARNING': return { color: "#E55934", weight: 3, opacity: 0.8, smoothFactor: 1 };
-            case 'LOCKING': return { color: "#E71D36", weight: 3, opacity: 0.8, smoothFactor: 1 };
-          }
-        }
-      };
+      this.route = res["route"]
+      let segments = res["routeSegments"]
+
       const outline: object = {
         style: function (feature) {
-          return { color: "#fff", weight: 6 };
+          return { color: "#e8dbdb", weight: 6 };
 
         }
       };
+      let circles = [];
+      let c; let p;
+      for (const seg of segments) {
+        let avgCoords = [seg["ya"], seg["xa"]]//[(seg["ya"] + seg["yz"]) / 2, (seg["xa"] + seg["xz"]) / 2]
+        c = circleMarker(avgCoords, {
+          color: 'white',
+          fillColor: "black",
+          // Stroke properties
+          opacity: 0.75,
+          weight: 4,
+          // Fill properties
+          fillOpacity: 0.9,
+          radius: 9
+        });
+        p = new L.Popup({ autoClose: false, closeOnClick: false })
+          .setContent("<small><b>" + new Date(seg["time"]).toLocaleDateString() + "</b><br>" +
+            new Date(seg["time"]).toLocaleTimeString() + "</small>")
+          .setLatLng(avgCoords);
+        c.bindPopup(p);
+        circles.push(c);
+      }
+      const routeOutline = L.geoJSON(this.route, outline);
+      const routeLayer = L.geoJSON(this.route, {
+        style: this.styleRoute,
+        onEachFeature: this.onRouteDetail
+      });
 
+      routeOutline.addTo(this.routeLayers);
+      routeLayer.addTo(this.routeLayers);
+      let i = 0; let j = 0
+      circles.forEach((c) => {
+        let label = new L.Tooltip({
+          noHide: true, // Force label to be shown permanently.
+          permanent: true,
+          direction: 'center',
+          className: 'text'
+        });
+
+        if (i === 0) {
+          c.addTo(this.routeLayers)
+          label.setContent("" + j).setLatLng(c._latlng).addTo(this.routeLayers);
+          j++
+        }
+        if (i % 4 === 0) {
+          c.addTo(this.routeLayers)
+          label.setContent("" + j).setLatLng(c._latlng).addTo(this.routeLayers);
+          j++
+        }
+        if (i === circles.length - 1) {
+          c.addTo(this.routeLayers)
+          label.setContent("" + j).setLatLng(c._latlng).addTo(this.routeLayers);
+          j++
+        }
+        i++;
+      });
+
+      this.hoverListner(routeLayer, this.hoverStyle, { weight: 2 })
+      this.map.fitBounds(routeLayer.getBounds())
+
+      // add label
+      this.route.features.forEach((feature) => {
+        let tooltip = new L.Tooltip({
+          noHide: true, // Force label to be shown permanently.
+          permanent: true,
+          direction: 'auto',
+          className: 'delay'
+        });
+        if (feature.properties.delay > 0) {
+          let mid = [feature.geometry.coordinates[Math.trunc(feature.geometry.coordinates.length / 2)][1],
+          feature.geometry.coordinates[Math.trunc(feature.geometry.coordinates.length / 2)][0]]
+          tooltip.setContent(feature.properties.delay + "h").setLatLng(mid).addTo(this.toolTipLayer)
+        }
+      });
+      this.mapTooltipListner(this.map, "zoomend", this.toolTipLayer, 9)
+    });
+    //this.map.on('click', (e) => { console.log(e.latlng); });
+  }
+
+  getRoute(): void {
+
+  }
+  /**
+   * todo: 
+   *  - create service for traffic infos
+   * get traffic info and add it to the map
+   */
+  getTrafficInfo(): void {
+    this.datafetcher.getTraffic().subscribe((res: any) => {
       this.trafficInfo = res["ntsMessages"]["FTM"];
       let trafficPoints = [];
       let lines = { type: "FeatureCollection", features: [] };
@@ -130,101 +244,134 @@ export class MapComponent implements OnInit {
             case 'LOCKING': offset = 0.0001;
           }
           feature.geometry.geometries[2].coordinates = feature.geometry.geometries[2].coordinates.
-            map((value) => { return [value[0] - offset, value[1] + offset]});
+            map((value) => { return [value[0] - offset, value[1] + offset] });
           feature.geometry = feature.geometry.geometries[2]
           lines.features.push(feature);
           linesSimple.push(feature.geometry);
         }
       }
-      L.geoJSON(linesSimple, outline).addTo(this.map);
-      L.geoJSON(lines, layerStyle).addTo(this.map);
+      // add to traffic layer
+      L.geoJSON(linesSimple, this.outline).addTo(this.trafficLayers);
+      const lineLayer = L.geoJSON(lines, this.layerStyle).addTo(this.trafficLayers);
+      const pointLayer = L.geoJSON(trafficPoints, { pointToLayer: this.trafficpoints2Layer }).addTo(this.trafficLayers);
 
-      L.geoJson(trafficPoints, {
-        /*
-         * When each feature is loaded from the GeoJSON this
-         * function is called. Here we create a cicle marker
-         * for the feature and style the circle marker.
-         */
-        pointToLayer: function (feature, latlng) {
-          return L.circleMarker(latlng, {
-            color: getColor(feature.properties.messageType),
-            fillColor: getColor(feature.properties.messageType),
-            // Stroke properties
-            opacity: 0.75,
-            weight: 2,
-            // Fill properties
-            fillOpacity: 0.25,
-            radius: 1.5
-          });
-        }
-      }).addTo(this.map);
+      // add layer to map
+      this.trafficLayers.addTo(this.map);
+      this.clickListner(lineLayer, this.datafetcher.trafficClick);
+      this.clickListner(pointLayer, this.datafetcher.trafficClick);
+      this.dbclickListner(lineLayer, this.datafetcher.activeTrafficInfo);
+      this.dbclickListner(pointLayer, this.datafetcher.activeTrafficInfo);
+      this.hoverListner(lineLayer, this.hoverStyle, { weight: 3 });
+      this.hoverListner(pointLayer, this.hoverStyle, { weight: 2, radius: 4 });
     });
-
-    this.datafetcher.connectionResponse.subscribe((res: any) => {
-      this.routeLayers.clearLayers();
-      this.route = res["route"]
-      let segments = res["routeSegments"]
-      console.log(this.route)
-      const layerStyle: object = {
-        style: function (feature) {
-          if (feature.properties.closeCall) {
-            return { color: "#9656a1", weight: 10 };
-
-          }
-          if (feature.properties.delay) {
-            return { color: "#ff7e67", weight: 10 };
-          }
-          return { color: "#ff7e67",dashArray: "3", weight: 2 };
-
-        }
-      }
-      const outline: object = {
-        style: function (feature) {
-          return { color: "#fff", weight: 4 };
-
-        }
-      };
-      let circles = [];
-      let c; let p;
-      for (const seg of segments) {
-        let avgCoords = [(seg["ya"] + seg["yz"]) / 2, (seg["xa"] + seg["xz"]) / 2]
-        c = circle(avgCoords, {
-          color: 'black',
-          fillOpacity: 0.5,
-          radius: 50
-        });
-        p = new L.Popup({ autoClose: false, closeOnClick: false })
-          .setContent("<small><b>" + new Date(seg["time"]).toLocaleDateString() + "</b><br>" +
-            new Date(seg["time"]).toLocaleTimeString() + "</small>")
-          .setLatLng(avgCoords);
-        c.bindPopup(p).openPopup();
-        circles.push(c);
-      }
-      const routeOutline = L.geoJSON(this.route, outline);
-      const routeLayer = L.geoJSON(this.route, layerStyle);
-      routeOutline.addTo(this.routeLayers);
-      routeLayer.addTo(this.routeLayers);
-      let i = 0;
-      circles.forEach((c) => {
-        c.addTo(this.routeLayers)
-        if (i === 0) { c.openPopup(); }
-        if (i === Math.trunc(circles.length / 2)) { c.openPopup(); }
-        if (i === circles.length - 1) { c.openPopup(); }
-        i++;
-      });
-      this.map.fitBounds(routeLayer.getBounds())
-    });
-
-
-    //this.map.on('click', (e) => { console.log(e.latlng); });
   }
+
+  getActiveTrafficInfo(): void {
+    this.datafetcher.activeTrafficInfo.subscribe((res) => {
+      let activeTraffic;
+      this.activeTrafficLayer.clearLayers();
+      if (res === undefined) return;
+      // different style for point or line
+      if ("Point".match(res.type)) {
+        activeTraffic = L.geoJSON(res, {
+          pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng, {
+              color: 'white',
+              fillColor: "#f75f00",
+              // Stroke properties
+              opacity: 0.75,
+              weight: 4,
+              // Fill properties
+              fillOpacity: 0.9,
+              radius: 13
+            });
+          }
+        }).addTo(this.activeTrafficLayer);
+      } else {
+        const outline = L.geoJSON(res, { color: "#fff", weight: 12 }).addTo(this.activeTrafficLayer);
+        activeTraffic = L.geoJSON(res, { weight: 8, color: "#f75f00" }).addTo(this.activeTrafficLayer);
+      }
+      this.map.fitBounds(activeTraffic.getBounds())
+    })
+  }
+
+  trafficpoints2Layer(feature, latlng) {
+    return L.circleMarker(latlng, {
+      color: 'white',
+      fillColor: getColor(feature.properties.messageType),
+      // Stroke properties
+      opacity: 0.75,
+      weight: 2,
+      // Fill properties
+      fillOpacity: 0.9,
+      radius: 4
+    });
+  }
+
+  onRouteDetail(feature, layer): void {
+   
+  }
+
+  styleRoute(feature): object {
+    if (feature.properties.closeCall) {
+      return { color: "#9656a1", weight: 10 };
+
+    }
+    if (feature.properties.delay) {
+      return { color: "#9d0b0b", weight: 4 };
+    }
+    return { color: "#ff7e67", dashArray: "3", weight: 2 };
+  }
+
+  // emits the data from a map click on specific layer
+  clickListner(layer: any, clickEmitter: EventEmitter<any>): void {
+    layer.on('click', (e) => {
+      this.activeTrafficLayer.clearLayers();
+      clickEmitter.emit(e);
+    });
+  }
+
+  // emits the data from a map click on specific layer
+  dbclickListner(layer: any, clickEmitter: EventEmitter<any>): void {
+    layer.on('dblclick', (e) => {
+      clickEmitter.emit(e.sourceTarget.feature);
+    });
+  }
+
+  hoverListner(layer: any, hoverStyle, baseStyle: any): void {
+    layer.on("mouseover", (e) => {
+      e.sourceTarget.setStyle(hoverStyle)
+    })
+    layer.on("mouseout", (e) => {
+      e.sourceTarget.setStyle(baseStyle);
+    })
+  }
+
+  mapTooltipListner(map: Map, action: string, layer: any, zoom: number) {
+    let oldZoom;
+    map.on(action, function () {
+      if(oldZoom > zoom && map.getZoom() >= zoom) {
+        console.log("no clear")
+        return;
+      }
+      if(oldZoom < zoom && map.getZoom() <= zoom) {
+        console.log("no clear")
+        return;
+      }
+      if (map.getZoom() > zoom) {
+        console.log("show")
+        oldZoom =  map.getZoom()
+        //this.toolTipLayer.setStyle({opacity: 1, fillOpacity: 1})
+        map.addLayer(layer)
+      } else {
+        oldZoom = map.getZoom() 
+        console.log("clear!")
+        //this.toolTipLayer.setStyle({opacity: 0, fillOpacity: 0})
+        map.removeLayer(layer);
+      }
+
+    })
+  }
+
 }
 
-function getColor(type: String): String {
-  switch (type) {
-    case 'INFORMATION': return "#2EC4B6";
-    case 'OBSTRUCTION': return "#FF9F1C";
-    case 'WARNING': return "#E55934";
-    case 'LOCKING': return "#E71D36";
-  }
-}

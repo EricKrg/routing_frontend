@@ -13,7 +13,9 @@ import { LocatorService } from './locator.service';
 import { DatePipe } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from 'ng-pick-datetime';
-import { MaterialModule } from 'src/matiral-module';
+import { MaterialModule } from './material-modul';
+import { TrafficContentComponent } from './content_comps/traffic-content/traffic-content.component';
+
 
 
 @NgModule({
@@ -21,6 +23,7 @@ import { MaterialModule } from 'src/matiral-module';
     AppComponent,
     MapComponent,
     HomeComponent,
+    TrafficContentComponent,
   ],
   imports: [
     BrowserModule,

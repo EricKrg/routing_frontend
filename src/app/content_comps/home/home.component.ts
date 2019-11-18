@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DataFetcherService } from 'src/app/data-fetcher.service';
 import { DatePipe } from '@angular/common';
-import { FormGroup, FormBuilder } from '@angular/forms';
 
 interface requestObj {
   id: string;
@@ -27,9 +26,13 @@ export class HomeComponent implements OnInit {
     { id: "3101", km: 100 },
     { id: "0701", km: 650 },
   ];
+  isExpand: boolean = true;
   selectedMoment: Date;
-  vType: String = "FSF";
-
+  vType: string = "BSF";
+  style: number = 0;
+  speed: number = 15;
+  opt: Boolean = false;
+  oneWay: Boolean = false;
   constructor(
     private dataFetcher: DataFetcherService,
     private datePipe: DatePipe,
@@ -89,16 +92,30 @@ export class HomeComponent implements OnInit {
   }
 
   findRoute(): void {
-    let params: string = "?";
-    console.log(this.vType)
+    let params: string = "?type=" + this.vType + "&style=" + 
+                           this.style + "&speed=" + this.speed;
+    if(this.reqArray.length > 2) {
+      params +="&optimize="+this.opt
+    }
+    console.log(params)
     if (this.selectedMoment !== undefined) {
       let time =  this.datePipe.transform(this.selectedMoment, 'yyyy-MM-dd-HH-mm').toString()
       console.log(time)
-      params += "time="+time
+      params += "&time="+time
     }
     console.log(params)
     this.dataFetcher.getRoute(this.buildRequest(), params);
   }
-
+  typeChange(e): void {
+    this.vType = e;
+    if("BSF".match(e)) this.style = 0;
+  }
+  styleChange(s: number): void {
+    this.style = s;
+  }
+  expandCard(): void {
+    this.isExpand = this.isExpand ? false : true;
+    
+  }
 
 }

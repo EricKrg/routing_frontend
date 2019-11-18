@@ -1,58 +1,105 @@
 <div class="row" style="height: 100%">
-  <div class="col" style="padding:0">
+  <div class="col">
     <app-map></app-map>
-  </div>
-  <div class="col-3 side-bar">
-    <div class="container">
+    <div class="overlay-btm-left">
+      <app-traffic-content></app-traffic-content>
+    </div>
+    <div class="overlay">
       <br>
-      <mat-card class="example-card">
-        <mat-card-header>
-          <div mat-card-avatar class="example-header-image"></div>
-          <mat-card-title>Routing controll</mat-card-title>
-          <mat-card-subtitle>DWRM</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <div *ngFor="let o of reqArray; let i = index">
+      <mat-card>
+        <button *ngIf="!isExpand" mat-icon-button type="button" color="warn" (click)="expandCard()">
+          <mat-icon>directions_boat</mat-icon>
+          <mat-icon mat-icon-button> expand_more</mat-icon>
+        </button>
+        <div *ngIf="isExpand">
+          <mat-card-header>
+            <mat-card-title>Routing control</mat-card-title>
+            <mat-card-subtitle>DWRM</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <section class="example-section">
+              <mat-radio-group color="primary">
+                <mat-radio-button class="example-margin" value="BSF" (change)="typeChange('BSF')" [checked]="true">
+                  BSF
+                </mat-radio-button>
+                <mat-radio-button class="example-margin" value="FSF" (change)="typeChange('FSF')">
+                  FSF
+                </mat-radio-button>
+              </mat-radio-group>
+              <mat-radio-group *ngIf="vType==='FSF'" color="primary">
+                <mat-radio-button class="example-margin" value="default" (change)="styleChange(0)" [checked]="true">
+                  Default
+                </mat-radio-button>
+                <mat-radio-button class="example-margin" value="RNS" (change)="styleChange(1)">
+                  RelaxNSafe
+                </mat-radio-button>
+              </mat-radio-group>
+            </section>
+            <div class="conatiner">
+              <mat-form-field>
+                <input matInput [(ngModel)]="selectedMoment" [owlDateTime]="dt1" [owlDateTimeTrigger]="dt1"
+                  placeholder="Date Time">
+                <owl-date-time #dt1></owl-date-time>
+              </mat-form-field>
+            </div>
             <table style="width: 100%;">
               <td>
-                <mat-form-field>
-                  <input matInput placeholder="ID" maxlength="4" type="text"
-                    [(ngModel)]='reqArray[i].id'>
+                <mat-slider color="primary" [max]="30" [min]="10" thumbLabel="true" [(ngModel)]="speed"
+                  style="width: 50%;">
+                </mat-slider>
+                <mat-form-field style="width: 20%;">
+                  <input matInput placeholder="km/h" [(ngModel)]="speed" maxlength="4" type="number">
                 </mat-form-field>
               </td>
               <td>
-                <mat-form-field>
-                  <input matInput placeholder="KM" type="number" [(ngModel)]='reqArray[i].km'>
-                </mat-form-field>
-              </td>
-              <td>
-                <div class="input-group-prepend">
-                  <button mat-icon-button (click)="removeStop(i)" color="warn">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </div>
+                <mat-slide-toggle *ngIf="this.reqArray.length > 2" checked="false" color="primary" [(ngModel)]="opt">
+                  Optimize!
+                </mat-slide-toggle>
+                <mat-slide-toggle *ngIf="this.reqArray.length > 2" checked="false" color="primary" [(ngModel)]="oneWay">
+                  Oneway
+                </mat-slide-toggle>
               </td>
             </table>
+            <div class="scroll">
+            <div *ngFor="let o of reqArray; let i = index">
+              <table style="width: 100%;">
+                <td>
+                  <mat-form-field>
+                    <input matInput placeholder="ID" maxlength="4" type="text" [(ngModel)]='reqArray[i].id'>
+                  </mat-form-field>
+                </td>
+                <td>
+                  <mat-form-field>
+                    <input matInput placeholder="KM" type="number" [(ngModel)]='reqArray[i].km'>
+                  </mat-form-field>
+                </td>
+                <td>
+                  <div class="input-group-prepend">
+                    <button mat-icon-button (click)="removeStop(i)">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </table>
+            </div>
           </div>
-          <div class="container">
-            <mat-form-field>
+            <div class="container">
               <div class="button-row container">
                 <button mat-mini-fab (click)="addStop()" color="primary">
                   <mat-icon>add</mat-icon>
                 </button>
               </div>
-            </mat-form-field>
-          </div>
-          <div class="conatiner">
-            <input matInput [(ngModel)]="selectedMoment" [owlDateTime]="dt1" [owlDateTimeTrigger]="dt1" placeholder="Date Time">
-            <owl-date-time #dt1></owl-date-time>
-          </div>
-        </mat-card-content>
-        <mat-card-actions>
-          <button type="button" class="btn btn-danger" (click)="findRoute()">Find Route</button>
-        </mat-card-actions>
+            </div>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-icon-button type="button" (click)="expandCard()">
+              <mat-icon *ngIf="isExpand">expand_less</mat-icon>
+            </button>
+            <button *ngIf="isExpand" mat-button type="button" class="btn btn-danger" (click)="findRoute()">Find
+              Route</button>
+          </mat-card-actions>
+        </div>
       </mat-card>
-
     </div>
   </div>
 </div>
