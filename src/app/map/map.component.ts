@@ -209,7 +209,7 @@ export class MapComponent implements OnInit {
         if (feature.properties.delay > 0) {
           let mid = [feature.geometry.coordinates[Math.trunc(feature.geometry.coordinates.length / 2)][1],
           feature.geometry.coordinates[Math.trunc(feature.geometry.coordinates.length / 2)][0]]
-          tooltip.setContent(feature.properties.delay + "h").setLatLng(mid).addTo(this.toolTipLayer)
+          tooltip.setContent("<b>Delay:</b> "+ feature.properties.delay + "h").setLatLng(mid).addTo(this.toolTipLayer)
         }
       });
       this.mapTooltipListner(this.map, "zoomend", this.toolTipLayer, 9)
