@@ -1,0 +1,45 @@
+<mat-accordion *ngIf="isRoute">
+    <mat-expansion-panel class="content-comp mat-expansion-panel-body" *ngIf="show()" expanded="true" hideToggle>
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                Routeinformation
+            </mat-panel-title>
+            <mat-panel-description>
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+        <mat-list>
+            <mat-list-item>
+                <mat-icon mat-list-icon>show_chart</mat-icon>
+                <h4 mat-line>Distance</h4>
+                <p mat-line> {{ this.distance }} </p>
+            </mat-list-item>
+            <mat-list-item>
+                <mat-icon mat-list-icon>access_time</mat-icon>
+                <h4 mat-line>Delay</h4>
+                <p mat-line> {{ this.delay }} </p>
+            </mat-list-item>
+            <mat-list-item>
+                <mat-icon mat-list-icon>timelapse</mat-icon>
+                <h4 mat-line>Traveltime</h4>
+                <p mat-line> {{ this.travelTime }} </p>
+            </mat-list-item>
+            <!-- <mat-list-item>
+                <mat-icon mat-list-icon>calendar_today</mat-icon>
+                <h4 mat-line>Arrival</h4>
+                <p mat-line> {{ this.arrival }} </p>
+            </mat-list-item>
+             -->
+            <mat-divider></mat-divider>
+            <h3 mat-subheader>Addtional Information</h3>
+            <mat-chip-list aria-label="Fish selection">
+                <mat-chip *ngIf="closeCalls" color="primary" selected>close Calls!</mat-chip>
+                <mat-chip *ngIf="partial" color="accent" selected>Partial</mat-chip>
+                <mat-chip *ngIf="impassable" color="warn" selected>Impassable</mat-chip>
+                <mat-chip *ngIf="distance===0" color="warn" selected>no Route!</mat-chip>
+            </mat-chip-list>
+        </mat-list>
+        <mat-action-row>
+            <br>
+        </mat-action-row>
+    </mat-expansion-panel>
+</mat-accordion>
