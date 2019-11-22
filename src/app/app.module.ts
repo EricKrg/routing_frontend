@@ -15,6 +15,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from 'ng-pick-datetime';
 import { MaterialModule } from './material-modul';
 import { TrafficContentComponent } from './content_comps/traffic-content/traffic-content.component';
+import { RouteInfoComponent } from './content_comps/route-info/route-info.component';
 
 
 
@@ -24,6 +25,7 @@ import { TrafficContentComponent } from './content_comps/traffic-content/traffic
     MapComponent,
     HomeComponent,
     TrafficContentComponent,
+    RouteInfoComponent,
   ],
   imports: [
     BrowserModule,
