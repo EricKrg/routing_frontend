@@ -129,9 +129,14 @@ export class MapComponent implements OnInit {
     this.datafetcher.connectionResponse.subscribe((res: any) => {
       this.routeLayers.clearLayers();
       this.toolTipLayer.clearLayers();
-
+      console.log(res)
       this.route = res["route"]
       let segments = res["routeSegments"]
+
+      if(segments === null) {
+        // no route
+        return;
+      }
 
       const outline: object = {
         style: function (feature) {
