@@ -39,18 +39,16 @@ export class DataFetcherService {
     let dateString: String = 'dateFrom/' + this.datePipe.transform(new Date(), 'yyyy-MM-dd').toString() +
                              '/dateTo/' + this.datePipe.transform(endDate, 'yyyy-MM-dd').toString();
     console.log(dateString)
-    return this.http.get('/traffic' + dateString).pipe(
+    return this.http.get('/traffic/' + dateString).pipe(
       map(res => res as JSON)
     );
   }
 
 
-  getRoute(body: object, params: String):void {// Observable<any> {
-    console.log("get route")
-    console.log( JSON.stringify(body));
+  getRoute(body: object, params: String):void {
     this.http.post('/api'+ params,JSON.stringify(body), {
               headers: { 'Content-Type': 'application/json' }}).
-    subscribe((res) => this.connectionResponse.emit(res));
+    subscribe((res) => this.connectionResponse.emit(res), err => console.log(err));
   }
 
 
