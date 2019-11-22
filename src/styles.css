@@ -52,6 +52,10 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   }
 
 
+.mat-expansion-panel-body {
+  padding: 0 12px 0px !important;
+}
+
   /* load fonts locally */
   @font-face {
     font-family: 'Material Icons';
