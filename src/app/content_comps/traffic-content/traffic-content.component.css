@@ -1,11 +1,11 @@
 .scroll {
-    max-height: 20vh;
+    max-height: 8vh;
     overflow-y: auto;
 }
 
 .content-comp {
     width: 95%;
-    max-width: 60vh;
+    max-width: 70vh;
 }
 .mat-action-row {
     border-top-style: solid;

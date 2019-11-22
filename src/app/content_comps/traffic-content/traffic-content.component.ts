@@ -50,14 +50,14 @@ export class TrafficContentComponent implements OnInit {
 
   showDate(): string {
     return new Date(this.content["validityPeriodStart"]).toDateString() + " - " +
-           new Date(this.content["validityPeriodEnd"]).toDateString()
+           new Date(this.content["validityPeriodEnd"]).toDateString();
   }
 
   toFeature(): void  {
-    this.dataFetcher.activeTrafficInfo.emit(this.contentGeom)
+    this.dataFetcher.activeTrafficInfo.emit(this.contentGeom);
   }
   onClose(): void {
     this.content = undefined;
-    this.dataFetcher.activeTrafficInfo.emit(undefined)
+    this.dataFetcher.activeTrafficInfo.emit(undefined);
   }
 }
