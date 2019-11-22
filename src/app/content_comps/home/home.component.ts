@@ -37,7 +37,7 @@ export class HomeComponent implements OnInit {
     private dataFetcher: DataFetcherService,
     private datePipe: DatePipe,
   ) {
-   }
+  }
 
   ngOnInit() {
     console.log(this.reqArray)
@@ -47,7 +47,7 @@ export class HomeComponent implements OnInit {
     this.reqArray.push({ id: "to", km: 0 })
   }
 
-  removeStop(i:number): void {
+  removeStop(i: number): void {
     this.reqArray.splice(i, 1);
   }
 
@@ -65,7 +65,7 @@ export class HomeComponent implements OnInit {
     let i: number = 0;
     for (const obj of this.reqArray) {
       pointsArr.push(obj);
-      if (j > 0 && j < this.reqArray.length-1) {
+      if (j > 0 && j < this.reqArray.length - 1) {
         pointsArr.push(obj);
       }
       j = j + 1;
@@ -92,30 +92,35 @@ export class HomeComponent implements OnInit {
   }
 
   findRoute(): void {
-    let params: string = "?type=" + this.vType + "&style=" + 
-                           this.style + "&speed=" + this.speed;
-    if(this.reqArray.length > 2) {
-      params +="&optimize="+this.opt
+    let params: string = "?type=" + this.vType + "&style=" +
+      this.style + "&speed=" + this.speed;
+    if (this.reqArray.length > 2) {
+      params += "&optimize=" + this.opt;
+      params += "&oneway=" + this.oneWay;
     }
     console.log(params)
     if (this.selectedMoment !== undefined) {
-      let time =  this.datePipe.transform(this.selectedMoment, 'yyyy-MM-dd-HH-mm').toString()
+      let time = this.datePipe.transform(this.selectedMoment, 'yyyy-MM-dd-HH-mm').toString();
       console.log(time)
-      params += "&time="+time
+      params += "&time=" + time;
     }
+    params +="&elwisformat=false";
     console.log(params)
     this.dataFetcher.getRoute(this.buildRequest(), params);
   }
+
   typeChange(e): void {
     this.vType = e;
-    if("BSF".match(e)) this.style = 0;
+    if ("BSF".match(e)) {
+      this.style = 0;
+    }
   }
   styleChange(s: number): void {
     this.style = s;
   }
   expandCard(): void {
     this.isExpand = this.isExpand ? false : true;
-    
+
   }
 
 }

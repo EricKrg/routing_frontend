@@ -13,9 +13,16 @@
   transition: box-shadow 280ms cubic-bezier(.4,0,.2,1);
   display: block;
   position: relative;
-  padding: 16px;
-  width: 90%;
+  padding: 10px;
+  width: 95%;
+  /* max-height: 75vh; */
   border-radius: 4px;
+  /* overflow-y: auto; */
+}
+
+.mat-card-content {
+  max-height: 42vh;
+  overflow-y: auto;
 }
 
 .overlay {     
@@ -30,9 +37,15 @@
   position: absolute;
   bottom: 1%;
   left: 3%; 
-  z-index: 1000;  
+  z-index: 1050;  
 }
 
+.overlay-btm-right {     
+  position: absolute;
+  bottom: 1%;
+  right: 3%; 
+  z-index: 1000;  
+}
 
 .button-row {
   margin-right: 8px;

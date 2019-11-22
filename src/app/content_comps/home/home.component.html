@@ -4,6 +4,9 @@
     <div class="overlay-btm-left">
       <app-traffic-content></app-traffic-content>
     </div>
+    <div class="overlay-btm-right">
+      <app-route-info></app-route-info>
+    </div>
     <div class="overlay">
       <br>
       <mat-card>
@@ -91,7 +94,7 @@
               </div>
             </div>
           </mat-card-content>
-          <mat-card-actions>
+          <mat-card-actions style="margin-bottom: 5px; padding: 4px 0;">
             <button mat-icon-button type="button" (click)="expandCard()">
               <mat-icon *ngIf="isExpand">expand_less</mat-icon>
             </button>
