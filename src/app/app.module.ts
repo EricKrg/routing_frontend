@@ -37,7 +37,6 @@ import { ControlComponent } from './content_comps/control/control.component';
     OwlDateTimeModule,
     OwlNativeDateTimeModule,
     MaterialModule
-
   ],
   providers: [DataFetcherService, LocatorService, DatePipe],
   bootstrap: [AppComponent]
