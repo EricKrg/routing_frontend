@@ -25,7 +25,7 @@
   overflow-y: auto;
 }
 
-.overlay {     
+.overlay-top-right {     
   position: absolute;
   top: 1%;
   left: 3%; 
@@ -49,18 +49,6 @@
 
 .button-row {
   margin-right: 8px;
-}
-
-
-.example-section {
-  display: flex;
-  align-content: center;
-  align-items: center;
-  height: 60px;
-}
-
-.example-margin {
-  margin: 10px;
 }
 
 

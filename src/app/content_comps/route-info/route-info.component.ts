@@ -16,6 +16,7 @@ export class RouteInfoComponent implements OnInit {
   impassable: boolean;
   partial: boolean;
   isRoute: boolean = false;
+  hasAdditionalInfo: boolean = false;
 
   constructor(
     private datafetcher: DataFetcherService
@@ -25,18 +26,17 @@ export class RouteInfoComponent implements OnInit {
     this.datafetcher.connectionResponse.subscribe((res: any) => {
       console.log(res);
       this.partial = res["partial"];
-      this.closeCall = res["closeCall"];
+      this.closeCall = res["closeCalls"];
       this.impassable = res["impassable"];
       this.arrival = new Date(res["arrival"]).toLocaleTimeString();
       this.distance = Math.round(res["distance"] * 10) / 10;
       this.delay = Math.round(res["absDelay"] * 10) / 10;
       this.travelTime = Math.round(res["travelTime"] * 10 ) / 10;
       this.isRoute = true;
+      // check for additional infos
+      this.hasAdditionalInfo = this.impassable || this.closeCall || this.partial
     });
-
   }
-
-
 
   show(): boolean {
     return true

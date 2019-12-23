@@ -1,0 +1,17 @@
+.section {
+    display: flex;
+    align-content: center;
+    align-items: center;
+    height: 60px;
+    margin: 10px;
+    padding: 8px !important;
+  }
+  
+.margin10 {
+  margin: 10px;
+}
+
+.mat-card-content {
+  max-height: 42vh;
+  overflow-y: auto;
+}
