@@ -1,5 +1,6 @@
 {
   "/api": {
+    "__target": "http://localhost:8080/routing-rest-0.1-master-alpha/routing/find-route",
     "target": "http://localhost:8080/routing/find-route",
     "pathRewrite": {
       "^/api": ""
