@@ -1,4 +1,11 @@
-# DiscoFrontend
+# DWRM Test-Frontend
+
+lightweight mapping client for a feature presentation of the DWRM  
+
+![](screens/Selection_002.png)
+
+![](screens/Selection_001.png)
+
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.2.1.
 
