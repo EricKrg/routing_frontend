@@ -7,8 +7,7 @@ import { MapComponent } from './map/map.component';
 import { DataFetcherService } from './data-fetcher.service';
 import { HomeComponent } from './content_comps/home/home.component';
 import { AppRoutingModule } from './app-routing.module';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { ModuleWithProviders } from '@angular/compiler/src/core';
+import { HttpClientModule } from '@angular/common/http';
 import { LocatorService } from './locator.service';
 import { DatePipe } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -16,6 +15,7 @@ import { OwlDateTimeModule, OwlNativeDateTimeModule } from 'ng-pick-datetime';
 import { MaterialModule } from './material-modul';
 import { TrafficContentComponent } from './content_comps/traffic-content/traffic-content.component';
 import { RouteInfoComponent } from './content_comps/route-info/route-info.component';
+import { ControlComponent } from './content_comps/control/control.component';
 
 
 
@@ -26,6 +26,7 @@ import { RouteInfoComponent } from './content_comps/route-info/route-info.compon
     HomeComponent,
     TrafficContentComponent,
     RouteInfoComponent,
+    ControlComponent,
   ],
   imports: [
     BrowserModule,
@@ -33,14 +34,13 @@ import { RouteInfoComponent } from './content_comps/route-info/route-info.compon
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
-    OwlDateTimeModule, 
+    OwlDateTimeModule,
     OwlNativeDateTimeModule,
     MaterialModule
- 
+
   ],
   providers: [DataFetcherService, LocatorService, DatePipe],
   bootstrap: [AppComponent]
 })
-export class AppModule { 
-  
+export class AppModule {
 }
