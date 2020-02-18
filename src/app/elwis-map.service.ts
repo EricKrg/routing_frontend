@@ -231,6 +231,8 @@ export class ElwisMapService {
 
     hoverListner(layer: any, hoverStyle, baseStyle: any): void {
         layer.on("mouseover", (e) => {
+            let speed = e.sourceTarget.feature.properties.speed
+            if(speed) e.sourceTarget.bindPopup("<b>Speed: </b>" + speed + "km/h").openPopup();
             e.sourceTarget.setStyle(hoverStyle)
         })
         layer.on("mouseout", (e) => {
