@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { DataFetcherService } from 'src/app/data-fetcher.service';
+import { error } from '@angular/compiler/src/util';
 
 interface requestObj {
     id: string;
@@ -30,8 +31,11 @@ export class ControlComponent implements OnInit {
     vType: string = "BSF";
     style: number = 0;
     speed: number = 15;
-    opt: Boolean = false;
-    oneWay: Boolean = false;
+    opt: boolean = false;
+    oneWay: boolean = false;
+    isAnalyze: boolean = false;
+    isLoading: boolean = false;
+
     constructor(
         private dataFetcher: DataFetcherService,
         private datePipe: DatePipe,
@@ -91,7 +95,8 @@ export class ControlComponent implements OnInit {
     }
 
     // building request, set params and call api
-    findRoute(): void {
+    async findRoute() {
+        this.isLoading = true;
         let params: string = "?type=" + this.vType + "&style=" +
             this.style + "&speed=" + this.speed;
         if (this.reqArray.length > 2) {
@@ -104,8 +109,13 @@ export class ControlComponent implements OnInit {
             params += "&time=" + time;
         }
         params += "&elwisformat=false";
-        console.log(params)
-        this.dataFetcher.getRoute(this.buildRequest(), params);
+        params += "&analyze=" + this.isAnalyze;
+        
+        this.dataFetcher.getRoute(this.buildRequest(), params).subscribe(
+            (res) => {
+                this.isLoading = false;
+                },
+            ).add(() => this.isLoading = false);
     }
 
     typeChange(e: string): void {
@@ -121,5 +131,14 @@ export class ControlComponent implements OnInit {
 
     expandCard(): void {
         this.isExpand = this.isExpand ? false : true;
+    }
+    getBtn(): String {
+        if (this.isAnalyze) {
+            return "warn"
+        }
+        return "disabled"
+    }
+    setAnalyze(): void {
+        this.isAnalyze = this.isAnalyze ? false : true;
     }
 }

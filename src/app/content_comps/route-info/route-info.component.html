@@ -2,7 +2,7 @@
     <mat-expansion-panel class="mat-expansion-panel-body" *ngIf="show()" expanded="true" hideToggle>
         <mat-expansion-panel-header>
             <mat-panel-title>
-                Routeinformation
+                Route-Info
             </mat-panel-title>
             <mat-panel-description>
             </mat-panel-description>
@@ -38,6 +38,7 @@
                     <mat-chip *ngIf="impassable" color="warn" selected>Impassable</mat-chip>
                     <mat-chip *ngIf="distance===0" color="warn" selected>no Route!</mat-chip>
                 </mat-chip-list>
+                <br>
             </div>
         </mat-list>
         <mat-action-row>

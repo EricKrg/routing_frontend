@@ -89,8 +89,20 @@
             <button mat-icon-button type="button" (click)="expandCard()">
                 <mat-icon *ngIf="isExpand">expand_less</mat-icon>
             </button>
-            <button *ngIf="isExpand" mat-button type="button" class="btn btn-danger" (click)="findRoute()">Find
-                Route</button>
+            <button *ngIf="isExpand" mat-button type="button" class="btn btn-danger" [disabled]="isLoading"
+                (click)="findRoute()">
+                <div *ngIf="!isLoading">Find Route</div>
+                <button mat-button class="lds-ellipsis" *ngIf="isLoading"> 
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </button>
+            </button>
+
+            <button *ngIf="reqArray.length < 3" mat-icon-button [color]="getBtn()" aria-label="Analyze Speed"
+                (click)="setAnalyze()" title="analyze moving speed">
+                <mat-icon>timer</mat-icon>
+            </button>
         </mat-card-actions>
     </div>
 </mat-card>
