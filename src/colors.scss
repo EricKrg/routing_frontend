@@ -1,0 +1,112 @@
+@import '~@angular/material/theming';
+
+
+body {
+    --primary-color: #314b77;
+    --primary-lighter-color: #c1c9d6;
+    --primary-darker-color: #1f335a;
+    --text-primary-color: #{$light-primary-text};
+    --text-primary-lighter-color: #{$dark-primary-text};
+    --text-primary-darker-color: #{$light-primary-text};
+  }
+  
+  $mat-primary: (
+    main: #314b77,
+    lighter: #c1c9d6,
+    darker: #1f335a,
+    200: #314b77, // For slide toggle,
+    contrast : (
+      main: $light-primary-text,
+      lighter: $dark-primary-text,
+      darker: $light-primary-text,
+    )
+  );
+  $theme-primary: mat-palette($mat-primary, main, lighter, darker);
+  
+  body {
+    --accent-color: #6298d3;
+    --accent-lighter-color: #d0e0f2;
+    --accent-darker-color: #467bc2;
+    --text-accent-color: #{$dark-primary-text};
+    --text-accent-lighter-color: #{$dark-primary-text};
+    --text-accent-darker-color: #{$light-primary-text};
+  }
+  
+  $mat-accent: (
+    main: #6298d3,
+    lighter: #d0e0f2,
+    darker: #467bc2,
+    200: #6298d3, // For slide toggle,
+    contrast : (
+      main: $dark-primary-text,
+      lighter: $dark-primary-text,
+      darker: $light-primary-text,
+    )
+  );
+  $theme-accent: mat-palette($mat-accent, main, lighter, darker);
+  
+  body {
+    --warn-color: #e04b4b;
+    --warn-lighter-color: #ffb3b3;
+    --warn-darker-color: #e04b4b;
+    --text-warn-color: #{$light-primary-text};
+    --text-warn-lighter-color: #{$dark-primary-text};
+    --text-warn-darker-color: #{$light-primary-text};
+  }
+  
+  $mat-warn: (
+    main: #e04b4b,
+    lighter: #ffb3b3,
+    darker: #e04b4b,
+    200: #e04b4b, // For slide toggle,
+    contrast : (
+      main: $light-primary-text,
+      lighter: $dark-primary-text,
+      darker: $light-primary-text,
+    )
+  );
+  $theme-warn: mat-palette($mat-warn, main, lighter, darker);
+  
+  body {
+    --grey-color: #e1e1e1;
+    --grey-lighter-color: #ebebeb;
+    --grey-darker-color: #e1e1e1;
+    --text-grey-color: #{$light-primary-text};
+    --text-grey-lighter-color: #{$dark-primary-text};
+    --text-grey-darker-color: #{$light-primary-text};
+  }
+  
+  $mat-grey: (
+    main: #e1e1e1,
+    lighter: #ebebeb,
+    darker: #c0c0c0,
+    200: #e1e1e1, // For slide toggle,
+    contrast : (
+      main: $light-primary-text,
+      lighter: $dark-primary-text,
+      darker: $light-primary-text,
+    )
+  );
+  $theme-grey: mat-palette($mat-grey, main, lighter, darker);
+
+  // Success (green)
+body {
+    --success-color: #43a047;
+    --success-lighter-color: #76d275;
+    --success-darker-color: #00701a;
+    --text-success-color: #{$light-primary-text};
+    --text-success-lighter-color: #{$dark-primary-text};
+    --text-success-darker-color: #{$light-primary-text};
+  }
+  $mat-success: (
+    main: #43a047,
+    lighter: #76d275,
+    darker: #00701a,
+    200: #43a047, // For slide toggle,
+    contrast : (
+      main: $light-primary-text,
+      lighter: $dark-primary-text,
+      darker: $light-primary-text,
+    )
+  );
+  
