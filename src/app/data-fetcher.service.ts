@@ -6,6 +6,7 @@ import { map, catchError } from 'rxjs/operators';
 import { LocatorService } from './locator.service';
 import { DatePipe } from '@angular/common';
 import { Body } from '@angular/http/src/body';
+import { RequestObj } from './content_comps/control/control.component';
 
 
 @Injectable({
@@ -29,6 +30,10 @@ export class DataFetcherService {
   route: EventEmitter<any> = new EventEmitter<any>();
   trackerResponse: EventEmitter<any> = new EventEmitter<any>();
   trafficClick: EventEmitter<any> = new EventEmitter<any>();
+  
+  mapClick: EventEmitter<any> = new EventEmitter<any>();
+
+  destinationEmitter: EventEmitter<RequestObj[]> = new EventEmitter<RequestObj[]>();
 
   constructor(private http: HttpClient,
     private datePipe: DatePipe, private locService: LocatorService) { }
@@ -47,10 +52,16 @@ export class DataFetcherService {
 
 
   getRoute(body: object, params: String): Observable<any> {
-    return this.requester('/api' + params, "post", 
+    return this.requester('/api/find-route' + params, "post", 
                          { 'Content-Type': 'application/json' }, JSON.stringify(body),
                          this.connectionResponse);
   }
+
+  getKmFromLocator(coords: number[]): Observable<RequestObj> {
+    return this.requester('/api/coords-to-km', "post", 
+                         { 'Content-Type': 'application/json' }, JSON.stringify(coords),
+                         undefined);
+  } 
 
 
   requester(url: string, method: string, inHeaders: object = {},
@@ -58,7 +69,9 @@ export class DataFetcherService {
     return this.http[method](url, body, { headers: inHeaders }).
       pipe(
         map((res) => {
-          emitter.emit(res);
+          if (emitter) {
+            emitter.emit(res);
+          }
           return res;
         }),
         catchError((err, caught) => {

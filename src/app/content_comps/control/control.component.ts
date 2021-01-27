@@ -1,11 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { DataFetcherService } from 'src/app/data-fetcher.service';
-import { error } from '@angular/compiler/src/util';
-
-interface requestObj {
-    id: string;
+import { Subscription } from 'rxjs';
+export interface RequestObj {
+    BwastrID: string;
     km: number;
+    coords: number[];
 }
 
 interface requestBody {
@@ -22,10 +22,7 @@ interface requestBody {
 })
 
 export class ControlComponent implements OnInit {
-    reqArray: requestObj[] = [
-        { id: "3101", km: 100 },
-        { id: "0701", km: 650 },
-    ];
+    reqArray: RequestObj[] = [];
     isExpand: boolean = true;
     selectedMoment: Date;
     vType: string = "BSF";
@@ -36,21 +33,53 @@ export class ControlComponent implements OnInit {
     isAnalyze: boolean = false;
     isLoading: boolean = false;
 
+    ignoreMessage: boolean = false;
+    ignoreSluice: boolean = false;
+
+    acitveDestination: number; 
+
+    locatorLoading: boolean = false;
+
     constructor(
         private dataFetcher: DataFetcherService,
-        private datePipe: DatePipe,
+        private datePipe: DatePipe
     ) {
     }
 
     ngOnInit() {
+        this.dataFetcher.mapClick.subscribe(async res =>  {
+            if (isNaN(this.acitveDestination)) {
+                // no destination set bail out
+                return
+            }
+            const locatorRes: RequestObj = await this.getKm(res.latlng);
+            this.reqArray[this.acitveDestination] = {BwastrID: locatorRes.BwastrID, km: locatorRes.km, coords: locatorRes.coords};
+            // filter empty entries
+            this.reqArray = this.reqArray.filter(i => i.coords.length === 2)
+            this.dataFetcher.destinationEmitter.emit(this.reqArray);
+            this.acitveDestination = undefined;
+        });
     }
 
     addStop(): void {
-        this.reqArray.push({ id: "to", km: 0 })
+        this.reqArray.push({ BwastrID: "to", km: 0, coords:[]})
+    }
+
+    waitForMapClick(index: number) {
+        this.acitveDestination = index;
+    }
+
+    async getKm(coords: {lat:number, lng:number}): Promise<RequestObj> {
+        console.log("get km")
+        this.locatorLoading = true;
+        const res = await this.dataFetcher.getKmFromLocator([coords.lng,coords.lat]).toPromise();
+        this.locatorLoading = false;
+        return res; 
     }
 
     removeStop(i: number): void {
         this.reqArray.splice(i, 1);
+        this.dataFetcher.destinationEmitter.emit(this.reqArray);
     }
 
     // build requestbody 
@@ -62,10 +91,13 @@ export class ControlComponent implements OnInit {
             bwastrKmTo: 0
         };
         let bodyArr: requestBody[] = [];
-        let pointsArr: requestObj[] = [];
+        let pointsArr: RequestObj[] = [];
 
         let j: number = 0;
         let i: number = 0;
+
+        this.reqArray = this.reqArray.filter(i => i.coords.length === 2)
+
         for (const obj of this.reqArray) {
             pointsArr.push(obj);
             if (j > 0 && j < this.reqArray.length - 1) {
@@ -75,10 +107,10 @@ export class ControlComponent implements OnInit {
         }
         for (const obj of pointsArr) {
             if (i % 2 === 0) {
-                body.bwastrIdFrom = obj.id;
+                body.bwastrIdFrom = obj.BwastrID;
                 body.bwastrKmFrom = obj.km;
             } else {
-                body.bwastrIdTo = obj.id;
+                body.bwastrIdTo = obj.BwastrID;
                 body.bwastrKmTo = obj.km;
 
                 bodyArr.push(body);
@@ -110,6 +142,10 @@ export class ControlComponent implements OnInit {
         }
         params += "&elwisformat=false";
         params += "&analyze=" + this.isAnalyze;
+
+        params += "&ignoreMessages="+this.ignoreMessage;
+        params += "&ignoreSluice="+this.ignoreSluice;
+        
         
         this.dataFetcher.getRoute(this.buildRequest(), params).subscribe(
             (res) => {

@@ -34,8 +34,11 @@ export class MapComponent implements OnInit {
   private activeTrafficLayer: LayerGroup = layerGroup();
   private toolTipLayer: LayerGroup = layerGroup();
   private tracker: LayerGroup = layerGroup();
+  private destinations: LayerGroup = layerGroup();
   private route;
   private trafficInfo;
+
+  
 
   // layerstyles
   layerStyle: object = {
@@ -108,7 +111,7 @@ export class MapComponent implements OnInit {
       maxZoom: 14,
       minZoom: 6,
       layers: [this.cartoDB_Voyager, this.wmsLayer,
-      this.activeTrafficLayer, this.geojsonLayers, this.routeLayers, this.tracker, this.toolTipLayer]
+      this.activeTrafficLayer, this.geojsonLayers, this.routeLayers, this.tracker, this.toolTipLayer, this.destinations]
     });
     control.layers(this.baseMaps).addTo(this.map);
 
@@ -128,7 +131,9 @@ export class MapComponent implements OnInit {
     // but not in the map-comp.
     this.elwisService.subTrafficData(this.map,this.trafficLayers, this.activeTrafficLayer);
     this.elwisService.subRoutingResponse(this.map, this.routeLayers,this.toolTipLayer);
+    this.elwisService.setDestinationPoints(this.map, this.destinations)
     this.elwisService.getActiveTrafficInfo(this.map, this.activeTrafficLayer);
+    this.elwisService.clickListner(this.map, undefined, this.datafetcher.mapClick)
   }
 }
 

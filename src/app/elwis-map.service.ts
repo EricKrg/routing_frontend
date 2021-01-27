@@ -5,6 +5,7 @@ import {
     CRS, Layer, GeoJSON, layerGroup, FeatureGroup, LayerGroup, LeafletMouseEvent, popup, circleMarker, TileLayer, latLngBounds,
     LatLng, GeoJSONOptions, SVG, Tooltip
 } from 'leaflet';
+import { RequestObj } from "./content_comps/control/control.component";
 
 declare var L: Leaflet;
 
@@ -18,6 +19,9 @@ function getColor(type: String): String {
     }
 }
 
+const NORMAL: number = 8;
+const NORMAL_RADIUS: number = 6;
+
 @Injectable({
     providedIn: 'root'
 })
@@ -28,7 +32,7 @@ export class ElwisMapService {
         style: function (feature) {
             return {
                 color: getColor(feature.properties.messageType),
-                weight: 3, opacity: 0.8, smoothFactor: 1
+                weight: NORMAL, opacity: 0.8, smoothFactor: 1
             };
         }
     };
@@ -54,17 +58,11 @@ export class ElwisMapService {
             let lines = { type: "FeatureCollection", features: [] };
             let linesSimple = []
             for (const feature of trafficInfo.features) {
+                // create a small offset
+                let offset = 0.0005;
                 if (feature.geometry.type === "Point") {
                     trafficPoints.push(feature);
                 } else {
-                    // create a small offset
-                    let offset = 0.0001;
-                    switch (feature.properties.messageType) {
-                        case 'INFORMATION': offset = 0.0009;
-                        case 'OBSTRUCTION': offset = 0.0004;
-                        case 'WARNING': offset = 0.0002;
-                        case 'LOCKING': offset = 0.0001;
-                    }
                     feature.geometry.geometries[2].coordinates = feature.geometry.geometries[2].coordinates.
                         map((value) => { return [value[0] - offset, value[1] + offset] });
                     feature.geometry = feature.geometry.geometries[2]
@@ -73,7 +71,7 @@ export class ElwisMapService {
                 }
             }
             // add to traffic layer
-            L.geoJSON(linesSimple, this.outline).addTo(trafficLayers);
+            //L.geoJSON(linesSimple, this.outline).addTo(trafficLayers);
             const lineLayer = L.geoJSON(lines, this.layerStyle).addTo(trafficLayers);
             const pointLayer = L.geoJSON(trafficPoints, { pointToLayer: this.trafficpoints2Layer }).addTo(trafficLayers);
             // add layer to map
@@ -83,8 +81,8 @@ export class ElwisMapService {
             this.clickListner(pointLayer, activeTrafficInfo, this.datafetcher.trafficClick);
             this.dbclickListner(lineLayer, this.datafetcher.activeTrafficInfo);
             this.dbclickListner(pointLayer, this.datafetcher.activeTrafficInfo);
-            this.hoverListner(lineLayer, this.hoverStyle, { weight: 3 });
-            this.hoverListner(pointLayer, this.hoverStyle, { weight: 2, radius: 4 });
+            this.hoverListner(lineLayer, this.hoverStyle, { weight: NORMAL });
+            this.hoverListner(pointLayer, this.hoverStyle, { weight: 4, radius: NORMAL_RADIUS });
         });
     }
     // get routing response and add it to the map
@@ -215,9 +213,30 @@ export class ElwisMapService {
         })
       }
 
+    setDestinationPoints(map: Map, layer: LayerGroup): void {
+        this.datafetcher.destinationEmitter.subscribe((res: RequestObj[]) => {
+            layer.clearLayers();
+            for (const dest of res) {
+                const c = circleMarker([dest.coords[1], dest.coords[0]], {
+                    color: 'white',
+                    fillColor: "black",
+                    // Stroke properties
+                    opacity: 0.75,
+                    weight: 4,
+                    // Fill properties
+                    fillOpacity: 0.9,
+                    radius: 15
+                });
+                c.addTo(layer)
+            }
+        })
+    }
+
     clickListner(layer: any, layerGroup: LayerGroup, clickEmitter: EventEmitter<any>): void {
         layer.on('click', (e) => {
-            layerGroup.clearLayers();
+            if (layerGroup) {
+                layerGroup.clearLayers();
+            }
             clickEmitter.emit(e);
         });
     }
@@ -249,7 +268,7 @@ export class ElwisMapService {
             weight: 2,
             // Fill properties
             fillOpacity: 0.9,
-            radius: 4
+            radius: NORMAL_RADIUS
         });
     }
 
@@ -273,20 +292,16 @@ export class ElwisMapService {
         let oldZoom;
         map.on(action, function () {
             if (oldZoom > zoom && map.getZoom() >= zoom) {
-                console.log("no clear")
                 return;
             }
             if (oldZoom < zoom && map.getZoom() <= zoom) {
-                console.log("no clear")
                 return;
             }
             if (map.getZoom() > zoom) {
-                console.log("show")
-                oldZoom = map.getZoom()
+                oldZoom = map.getZoom();
                 map.addLayer(layer)
             } else {
-                oldZoom = map.getZoom()
-                console.log("clear!")
+                oldZoom = map.getZoom();
                 map.removeLayer(layer);
             }
 

@@ -9,6 +9,7 @@
             <mat-card-subtitle>DWRM</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
+            <mat-card-subtitle class="m0">Routing style</mat-card-subtitle>
             <section class="section">
                 <mat-radio-group color="primary">
                     <mat-radio-button class="margin10" value="BSF" (change)="typeChange('BSF')" [checked]="true">
@@ -27,6 +28,18 @@
                     </mat-radio-button>
                 </mat-radio-group>
             </section>
+            <mat-divider></mat-divider>
+            <mat-card-subtitle class="m0">Routing options</mat-card-subtitle>
+            <section class="section">
+                <mat-slide-toggle style="padding: 8px;" checked="false" color="primary" [(ngModel)]="ignoreMessage">
+                    ignore Messages
+                </mat-slide-toggle>
+                <mat-slide-toggle style="padding: 8px;" checked="false" color="primary" [(ngModel)]="ignoreSluice">
+                    ignore Sluice
+                </mat-slide-toggle>
+            </section>
+            <mat-divider></mat-divider>
+            <mat-card-subtitle class="m0">Routing parameters</mat-card-subtitle>
             <div class="conatiner">
                 <mat-form-field>
                     <input matInput [(ngModel)]="selectedMoment" [owlDateTime]="dt1" [owlDateTimeTrigger]="dt1"
@@ -35,36 +48,43 @@
                 </mat-form-field>
             </div>
             <table style="width: 100%;">
-                <td>
+                <section>
                     <mat-slider color="primary" [max]="30" [min]="10" thumbLabel="true" [(ngModel)]="speed"
-                        style="width: 50%;">
+                        style="width: 80%;">
                     </mat-slider>
                     <mat-form-field style="width: 20%;">
                         <input matInput placeholder="km/h" [(ngModel)]="speed" maxlength="4" type="number">
                     </mat-form-field>
-                </td>
-                <td>
-                    <mat-slide-toggle *ngIf="this.reqArray.length > 2" checked="false" color="primary"
+                </section>
+                <mat-card-subtitle [hidden]="this.reqArray.length < 3" class="m0">Multidestination parameters</mat-card-subtitle>
+                <section class="section" [hidden]="this.reqArray.length < 3">
+                    <mat-slide-toggle style="padding: 8px;" checked="false" color="primary"
                         [(ngModel)]="opt">
-                        Optimize!
+                        optimize route
                     </mat-slide-toggle>
-                    <mat-slide-toggle *ngIf="this.reqArray.length > 2" checked="false" color="primary"
+                    <mat-slide-toggle style="padding: 8px;" checked="false" color="primary"
                         [(ngModel)]="oneWay">
                         Oneway
                     </mat-slide-toggle>
-                </td>
+                </section>
             </table>
-            <div class="scroll">
+            <mat-divider></mat-divider>
+            <!-- Routing stops -->
+            <div class="scroll m0">
+                <mat-card-subtitle class="text-center" [hidden]="reqArray.length !== 0">Add Routingstops by using the Button below</mat-card-subtitle>
                 <div *ngFor="let o of reqArray; let i = index">
-                    <table style="width: 100%;">
+                    <!-- <mat-progress-bar  mode="buffer" [hidden]="i !== acitveDestination && !locatorLoading"  mode="indeterminate"></mat-progress-bar> -->
+                    <mat-progress-bar [hidden]="i !== acitveDestination && !locatorLoading" mode="buffer"></mat-progress-bar>
+                    <table style="width: 100%;" [class.highlight]="i === acitveDestination">
                         <td>
                             <mat-form-field>
-                                <input matInput placeholder="ID" maxlength="4" type="text" [(ngModel)]='reqArray[i].id'>
+                                <input disabled matInput placeholder="ID" type="text" [(ngModel)]='o.BwastrID'>
+                                 <mat-hint [hidden]="i !== acitveDestination">Select by clicking on the map</mat-hint>
                             </mat-form-field>
                         </td>
                         <td>
                             <mat-form-field>
-                                <input matInput placeholder="KM" type="number" [(ngModel)]='reqArray[i].km'>
+                                <input disabled matInput placeholder="KM" type="number" [(ngModel)]='o.km'>
                             </mat-form-field>
                         </td>
                         <td>
@@ -72,14 +92,17 @@
                                 <button mat-icon-button (click)="removeStop(i)">
                                     <mat-icon>close</mat-icon>
                                 </button>
+                                <button mat-icon-button (click)="waitForMapClick(i)" [disabled]="locatorLoading">
+                                    <mat-icon>add_location</mat-icon>
+                                </button>
                             </div>
                         </td>
                     </table>
                 </div>
             </div>
             <div class="container">
-                <div class="button-row container">
-                    <button mat-mini-fab (click)="addStop()" color="primary">
+                <div class="button-row container text-center" style="padding: 5px;">
+                    <button mat-mini-fab (click)="addStop()" style="box-shadow: none;" color="primary">
                         <mat-icon>add</mat-icon>
                     </button>
                 </div>
@@ -89,20 +112,18 @@
             <button mat-icon-button type="button" (click)="expandCard()">
                 <mat-icon *ngIf="isExpand">expand_less</mat-icon>
             </button>
-            <button *ngIf="isExpand" mat-button type="button" class="btn btn-danger" [disabled]="isLoading"
-                (click)="findRoute()">
+            <button *ngIf="isExpand" mat-button type="button" class="btn btn-danger" 
+                    [disabled]="isLoading"
+                    [hidden] = "reqArray.length < 2"
+                    (click)="findRoute()">
                 <div *ngIf="!isLoading">Find Route</div>
-                <button mat-button class="lds-ellipsis" *ngIf="isLoading"> 
+                <button mat-button class="lds-ellipsis" *ngIf="isLoading">
                     <div></div>
                     <div></div>
                     <div></div>
                 </button>
             </button>
 
-            <button *ngIf="reqArray.length < 3" mat-icon-button [color]="getBtn()" aria-label="Analyze Speed"
-                (click)="setAnalyze()" title="analyze moving speed">
-                <mat-icon>timer</mat-icon>
-            </button>
         </mat-card-actions>
     </div>
 </mat-card>
