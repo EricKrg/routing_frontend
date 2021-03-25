@@ -57,7 +57,6 @@ export class DataFetcherService {
   }
 
   removeRoute() {
-    console.log("emit remove...")
     this.removeEmitter.emit(true);
   }
 
