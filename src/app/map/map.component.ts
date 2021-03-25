@@ -76,11 +76,28 @@ export class MapComponent implements OnInit {
     attribution: 'Tiles courtesy of <a href="http://openstreetmap.se/" target="_blank">OpenStreetMap Sweden</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   });
 
-  wmsLayer: TileLayer = tileLayer.wms('https://atlas.wsv.bund.de/bwastr/wms?', {
-    layers: 'Gewaessernetz', format: "image/png", transparent: "true"
+  // atlas: TileLayer = tileLayer.wms('https://sgx.geodatenzentrum.de/wms_webatlasde.light', {
+  //   maxZoom: 18,
+  //   layers: 'webatlasde.light',
+  //   attribution: '',
+  //   //opacity: 0.5,
+  //   transparent: "true"
+  // });
+
+  sentinel: TileLayer = tileLayer.wms('https://sgx.geodatenzentrum.de/wms_sentinel2_de', {
+    layers: 'sentinel2-de:rgb', format: "image/png", 
+  });
+
+  eu: TileLayer = tileLayer.wms('https://sgx.geodatenzentrum.de/wms_topplus_open', {
+    layers: 'web_grau', format: "image/png", transparent: "true"
   })
 
+  warterWays: TileLayer = tileLayer.wms('https://atlas.wsv.bund.de/bwastr/wms?', {
+    layers: 'Gewaessernetz', format: "image/png", transparent: "true"
+  });
+
   baseMaps: any = {
+    //'atlas': this.atlas,
     'light': this.cartoDB_Voyager,
     'dark': this.cartoDB_DarkMatter,
     'water': this.hydda
@@ -110,7 +127,10 @@ export class MapComponent implements OnInit {
       preferCanvas: true,
       maxZoom: 14,
       minZoom: 6,
-      layers: [this.cartoDB_Voyager, this.wmsLayer,
+      layers: [this.eu, 
+        //this.sentinel,
+       //  this.atlas,
+         this.warterWays,
       this.activeTrafficLayer, this.geojsonLayers, this.routeLayers, this.tracker, this.toolTipLayer, this.destinations]
     });
     control.layers(this.baseMaps).addTo(this.map);
@@ -123,14 +143,18 @@ export class MapComponent implements OnInit {
     });
 
     this.datafetcher.removeEmitter.subscribe(() => {
+      console.log("remove map")
       this.geojsonLayers.clearLayers();
       this.tracker.clearLayers();
+      this.routeLayers.clearLayers();
+      console.log(this.routeLayers)
     });
 
     // everything which manipulates the map is done in the specific service 
     // but not in the map-comp.
     this.elwisService.subTrafficData(this.map,this.trafficLayers, this.activeTrafficLayer);
     this.elwisService.subRoutingResponse(this.map, this.routeLayers,this.toolTipLayer);
+    this.elwisService.removeRoute(this.map, this.routeLayers);
     this.elwisService.setDestinationPoints(this.map, this.destinations)
     this.elwisService.getActiveTrafficInfo(this.map, this.activeTrafficLayer);
     this.elwisService.clickListner(this.map, undefined, this.datafetcher.mapClick)
