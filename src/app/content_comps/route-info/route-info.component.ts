@@ -36,6 +36,8 @@ export class RouteInfoComponent implements OnInit {
       // check for additional infos
       this.hasAdditionalInfo = this.impassable || this.closeCall || this.partial
     });
+
+    this.datafetcher.removeEmitter.subscribe(()=> this.isRoute=false);
   }
 
   show(): boolean {

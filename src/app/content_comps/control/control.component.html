@@ -31,10 +31,10 @@
             <mat-divider></mat-divider>
             <mat-card-subtitle class="m0">Routing options</mat-card-subtitle>
             <section class="section">
-                <mat-slide-toggle style="padding: 8px;" checked="false" color="primary" [(ngModel)]="ignoreMessage">
+                <mat-slide-toggle style="padding: 8px;" checked="false" color="primary" [(ngModel)]="ignoreMessage" (ngModelChange)="paramChanges()">
                     ignore Messages
                 </mat-slide-toggle>
-                <mat-slide-toggle style="padding: 8px;" checked="false" color="primary" [(ngModel)]="ignoreSluice">
+                <mat-slide-toggle style="padding: 8px;" checked="false" color="primary" [(ngModel)]="ignoreSluice" (ngModelChange)="paramChanges()">
                     ignore Sluice
                 </mat-slide-toggle>
             </section>
@@ -59,11 +59,11 @@
                 <mat-card-subtitle [hidden]="this.reqArray.length < 3" class="m0">Multidestination parameters</mat-card-subtitle>
                 <section class="section" [hidden]="this.reqArray.length < 3">
                     <mat-slide-toggle style="padding: 8px;" checked="false" color="primary"
-                        [(ngModel)]="opt">
+                        [(ngModel)]="opt" (ngModelChange)="paramChanges()">
                         optimize route
                     </mat-slide-toggle>
                     <mat-slide-toggle style="padding: 8px;" checked="false" color="primary"
-                        [(ngModel)]="oneWay">
+                        [(ngModel)]="oneWay" (ngModelChange)="paramChanges()">
                         Oneway
                     </mat-slide-toggle>
                 </section>

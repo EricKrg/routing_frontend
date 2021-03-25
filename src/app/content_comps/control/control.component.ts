@@ -1,7 +1,6 @@
 import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { DataFetcherService } from 'src/app/data-fetcher.service';
-import { Subscription } from 'rxjs';
 export interface RequestObj {
     BwastrID: string;
     km: number;
@@ -56,13 +55,18 @@ export class ControlComponent implements OnInit {
             this.reqArray[this.acitveDestination] = {BwastrID: locatorRes.BwastrID, km: locatorRes.km, coords: locatorRes.coords};
             // filter empty entries
             this.reqArray = this.reqArray.filter(i => i.coords.length === 2)
+            if (this.reqArray.length > 1) {
+                this.findRoute();
+            }
             this.dataFetcher.destinationEmitter.emit(this.reqArray);
             this.acitveDestination = undefined;
         });
     }
 
     addStop(): void {
-        this.reqArray.push({ BwastrID: "to", km: 0, coords:[]})
+        this.reqArray.push({ BwastrID: "to", km: 0, coords:[]});
+        this.acitveDestination = this.reqArray.length-1;
+        
     }
 
     waitForMapClick(index: number) {
@@ -80,6 +84,11 @@ export class ControlComponent implements OnInit {
     removeStop(i: number): void {
         this.reqArray.splice(i, 1);
         this.dataFetcher.destinationEmitter.emit(this.reqArray);
+        if (this.reqArray.length < 2) {
+            this.dataFetcher.removeRoute();
+            return;
+        }
+        this.findRoute();
     }
 
     // build requestbody 
@@ -128,6 +137,9 @@ export class ControlComponent implements OnInit {
 
     // building request, set params and call api
     async findRoute() {
+        if (this.reqArray.length < 2) {
+            return
+        }
         this.isLoading = true;
         let params: string = "?type=" + this.vType + "&style=" +
             this.style + "&speed=" + this.speed;
@@ -159,10 +171,16 @@ export class ControlComponent implements OnInit {
         if ("BSF".match(e)) {
             this.style = 0;
         }
+        if (this.reqArray.length > 1) {
+            this.findRoute();
+        }
     }
 
     styleChange(s: number): void {
         this.style = s;
+        if (this.reqArray.length > 1) {
+            this.findRoute();
+        }
     }
 
     expandCard(): void {
@@ -176,5 +194,9 @@ export class ControlComponent implements OnInit {
     }
     setAnalyze(): void {
         this.isAnalyze = this.isAnalyze ? false : true;
+    }
+
+    paramChanges(): void {
+        this.findRoute();
     }
 }

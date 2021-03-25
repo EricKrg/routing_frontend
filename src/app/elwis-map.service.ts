@@ -36,9 +36,12 @@ export class ElwisMapService {
             };
         }
     };
+
+    routeStyle: any = {};
+
     outline: object = {
         style: function () {
-            return { color: "#fff", weight: 6 };
+            return { color: "#fff", weight: 12 };
 
         }
     };
@@ -48,6 +51,18 @@ export class ElwisMapService {
     constructor(
         private datafetcher: DataFetcherService
     ) {
+
+    }
+
+    removeRoute(map: any, routeLayer: LayerGroup) {
+        this.datafetcher.removeRouteEmitter.subscribe(() => {
+            console.log("removing route..")
+            routeLayer.eachLayer(element => {
+                console.log(element)
+                element.setStyle({fillColor: "blue"})
+            });
+        })
+
 
     }
     // get trafffic data from nts service and add it to map
@@ -101,7 +116,7 @@ export class ElwisMapService {
 
             const outline: object = {
                 style: function (feature) {
-                    return { color: "#e8dbdb", weight: 6 };
+                    return { color: "#314b77", weight: 8 };
 
                 }
             };
@@ -186,32 +201,32 @@ export class ElwisMapService {
 
     getActiveTrafficInfo(map: Map, activeTrafficLayer: LayerGroup): void {
         this.datafetcher.activeTrafficInfo.subscribe((res) => {
-          let activeTraffic;
-          activeTrafficLayer.clearLayers();
-          if (res === undefined) return;
-          // different style for point or line
-          if ("Point".match(res.type)) {
-            activeTraffic = L.geoJSON(res, {
-              pointToLayer: function (feature, latlng) {
-                return L.circleMarker(latlng, {
-                  color: 'white',
-                  fillColor: "#f75f00",
-                  // Stroke properties
-                  opacity: 0.75,
-                  weight: 4,
-                  // Fill properties
-                  fillOpacity: 0.9,
-                  radius: 13
-                });
-              }
-            }).addTo(activeTrafficLayer);
-          } else {
-            const outline = L.geoJSON(res, { color: "#fff", weight: 12 }).addTo(activeTrafficLayer);
-            activeTraffic = L.geoJSON(res, { weight: 8, color: "#f75f00" }).addTo(activeTrafficLayer);
-          }
-          map.fitBounds(activeTraffic.getBounds())
+            let activeTraffic;
+            activeTrafficLayer.clearLayers();
+            if (res === undefined) return;
+            // different style for point or line
+            if ("Point".match(res.type)) {
+                activeTraffic = L.geoJSON(res, {
+                    pointToLayer: function (feature, latlng) {
+                        return L.circleMarker(latlng, {
+                            color: 'white',
+                            fillColor: "#f75f00",
+                            // Stroke properties
+                            opacity: 0.75,
+                            weight: 4,
+                            // Fill properties
+                            fillOpacity: 0.9,
+                            radius: 13
+                        });
+                    }
+                }).addTo(activeTrafficLayer);
+            } else {
+                const outline = L.geoJSON(res, { color: "#fff", weight: 12 }).addTo(activeTrafficLayer);
+                activeTraffic = L.geoJSON(res, { weight: 8, color: "#f75f00" }).addTo(activeTrafficLayer);
+            }
+            map.fitBounds(activeTraffic.getBounds())
         })
-      }
+    }
 
     setDestinationPoints(map: Map, layer: LayerGroup): void {
         this.datafetcher.destinationEmitter.subscribe((res: RequestObj[]) => {
@@ -251,7 +266,7 @@ export class ElwisMapService {
     hoverListner(layer: any, hoverStyle, baseStyle: any): void {
         layer.on("mouseover", (e) => {
             let speed = e.sourceTarget.feature.properties.speed
-            if(speed) e.sourceTarget.bindPopup("<b>Speed: </b>" + speed + "km/h").openPopup();
+            if (speed) e.sourceTarget.bindPopup("<b>Speed: </b>" + speed + "km/h").openPopup();
             e.sourceTarget.setStyle(hoverStyle)
         })
         layer.on("mouseout", (e) => {
@@ -280,7 +295,7 @@ export class ElwisMapService {
         if (feature.properties.delay) {
             return { color: "#9d0b0b", weight: 4 };
         }
-        return { color: "#ff7e67", dashArray: "3", weight: 2 };
+        return { color: "white", dashArray: "3", weight: 2 };
     }
 
     onRouteDetail(feature, layer): void {

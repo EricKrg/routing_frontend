@@ -1,12 +1,11 @@
 import { Injectable, EventEmitter } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Http, Headers } from '@angular/http';
-import { Observable, Subscription, throwError, empty } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { LocatorService } from './locator.service';
 import { DatePipe } from '@angular/common';
-import { Body } from '@angular/http/src/body';
 import { RequestObj } from './content_comps/control/control.component';
+import { environment } from 'src/environments/environment';
 
 
 @Injectable({
@@ -21,6 +20,7 @@ export class DataFetcherService {
   allInResponse: EventEmitter<any> = new EventEmitter<any>();
   allOutResponse: EventEmitter<any> = new EventEmitter<any>();
   connectionResponse: EventEmitter<any> = new EventEmitter<any>();
+  removeRouteEmitter: EventEmitter<any> = new EventEmitter<any>();
 
   longestCon: EventEmitter<any> = new EventEmitter<any>();
   shortestCon: EventEmitter<any> = new EventEmitter<any>();
@@ -42,27 +42,30 @@ export class DataFetcherService {
   getTraffic(): Observable<any> {
     let startDate: Date = new Date();
     let endDate: Date = new Date(startDate.setMonth(startDate.getMonth() + 1));
-    let dateString: String = 'dateFrom/' + this.datePipe.transform(new Date(), 'yyyy-MM-dd').toString() +
+    let dateString: String = '/dateFrom/' + this.datePipe.transform(new Date(), 'yyyy-MM-dd').toString() +
       '/dateTo/' + this.datePipe.transform(endDate, 'yyyy-MM-dd').toString();
-    console.log(dateString)
-    return this.http.get('/traffic/' + dateString).pipe(
+    console.log(environment.trafficUrl + dateString)
+    return this.http.get(environment.trafficUrl + dateString).pipe(
       map(res => res as JSON)
     );
   }
 
-
   getRoute(body: object, params: String): Observable<any> {
-    return this.requester('/api/find-route' + params, "post", 
+    return this.requester(environment.apiUrl + '/find-route' + params, "post", 
                          { 'Content-Type': 'application/json' }, JSON.stringify(body),
                          this.connectionResponse);
   }
 
+  removeRoute() {
+    console.log("emit remove...")
+    this.removeEmitter.emit(true);
+  }
+
   getKmFromLocator(coords: number[]): Observable<RequestObj> {
-    return this.requester('/api/coords-to-km', "post", 
+    return this.requester(environment.apiUrl  + '/coords-to-km', "post", 
                          { 'Content-Type': 'application/json' }, JSON.stringify(coords),
                          undefined);
   } 
-
 
   requester(url: string, method: string, inHeaders: object = {},
     body: string = "{}", emitter: EventEmitter<any>): Observable<any> {
@@ -74,13 +77,13 @@ export class DataFetcherService {
           }
           return res;
         }),
-        catchError((err, caught) => {
+        catchError(err => {
           console.log(err)
           const errorMsg = err.error.msg ? err.error.msg : "no details provided!"
           alert("An error occured, try again later :(" +
                 "\nHttp-Status: " + err.status + " " + err.statusText +
                 "\nMessage: " + errorMsg)
-          return empty();
+          return of();
         })
       );
   }
