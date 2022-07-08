@@ -5,7 +5,8 @@
 export const environment = {
   production: false,
   apiUrl: "/api",
-  trafficUrl: "/traffic"
+  trafficUrl: "/traffic",
+  bwastWms: "/bwastr-wms"
 };
 
 /*

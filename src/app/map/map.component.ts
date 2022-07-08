@@ -7,6 +7,7 @@ import {
 import { LocatorService } from '../locator.service';
 import { DataFetcherService } from '../data-fetcher.service';
 import { ElwisMapService } from '../elwis-map.service';
+import { environment } from 'src/environments/environment';
 
 declare var L: Leaflet;
 
@@ -38,7 +39,7 @@ export class MapComponent implements OnInit {
   private route;
   private trafficInfo;
 
-  
+
 
   // layerstyles
   layerStyle: object = {
@@ -71,36 +72,26 @@ export class MapComponent implements OnInit {
     maxZoom: 19
   });
 
-  hydda: TileLayer = tileLayer('https://{s}.tile.openstreetmap.se/hydda/full/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-    attribution: 'Tiles courtesy of <a href="http://openstreetmap.se/" target="_blank">OpenStreetMap Sweden</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  });
-
-  // atlas: TileLayer = tileLayer.wms('https://sgx.geodatenzentrum.de/wms_webatlasde.light', {
-  //   maxZoom: 18,
-  //   layers: 'webatlasde.light',
-  //   attribution: '',
-  //   //opacity: 0.5,
-  //   transparent: "true"
-  // });
-
   sentinel: TileLayer = tileLayer.wms('https://sgx.geodatenzentrum.de/wms_sentinel2_de', {
-    layers: 'sentinel2-de:rgb', format: "image/png", 
+    layers: 'sentinel2-de:rgb', format: "image/png",
   });
 
   eu: TileLayer = tileLayer.wms('https://sgx.geodatenzentrum.de/wms_topplus_open', {
     layers: 'web_grau', format: "image/png", transparent: "true"
   })
 
-  warterWays: TileLayer = tileLayer.wms('https://atlas.wsv.bund.de/bwastr/wms?', {
+
+  warterWays: TileLayer = tileLayer.wms('https://atlas.wsv.bund.de/bwastr/wms', {
     layers: 'Gewaessernetz', format: "image/png", transparent: "true"
   });
+  // warterWays: TileLayer = tileLayer.wms(environment.bwastWms, {
+  //   layers: 'Gewaessernetz', format: "image/png", transparent: "true"
+  // });
 
   baseMaps: any = {
-    //'atlas': this.atlas,
     'light': this.cartoDB_Voyager,
-    'dark': this.cartoDB_DarkMatter,
-    'water': this.hydda
+    // 'dark': this.cartoDB_DarkMatter,
+    // 'water': this.eu
   };
 
   overlayMaps: any = {
@@ -127,11 +118,17 @@ export class MapComponent implements OnInit {
       preferCanvas: true,
       maxZoom: 14,
       minZoom: 6,
-      layers: [this.eu, 
-        //this.sentinel,
-       //  this.atlas,
-         this.warterWays,
-      this.activeTrafficLayer, this.geojsonLayers, this.routeLayers, this.tracker, this.toolTipLayer, this.destinations]
+      layers: [
+        //this.eu,
+        this.cartoDB_Voyager,
+        this.activeTrafficLayer,
+        this.geojsonLayers,
+        this.routeLayers, 
+        this.tracker, 
+        this.toolTipLayer, 
+        this.destinations,
+        this.warterWays, 
+      ]
     });
     control.layers(this.baseMaps).addTo(this.map);
 
@@ -142,18 +139,18 @@ export class MapComponent implements OnInit {
       circle(e.latlng, { color: 'red', fillOpacity: 0.5, radius: radius }).addTo(this.map);
     });
 
+    this.warterWays.setZIndex(2000)
+
     this.datafetcher.removeEmitter.subscribe(() => {
-      console.log("remove map")
       this.geojsonLayers.clearLayers();
       this.tracker.clearLayers();
       this.routeLayers.clearLayers();
-      console.log(this.routeLayers)
     });
 
     // everything which manipulates the map is done in the specific service 
     // but not in the map-comp.
-    this.elwisService.subTrafficData(this.map,this.trafficLayers, this.activeTrafficLayer);
-    this.elwisService.subRoutingResponse(this.map, this.routeLayers,this.toolTipLayer);
+    this.elwisService.subTrafficData(this.map, this.trafficLayers, this.activeTrafficLayer);
+    this.elwisService.subRoutingResponse(this.map, this.routeLayers, this.toolTipLayer);
     this.elwisService.removeRoute(this.map, this.routeLayers);
     this.elwisService.setDestinationPoints(this.map, this.destinations)
     this.elwisService.getActiveTrafficInfo(this.map, this.activeTrafficLayer);

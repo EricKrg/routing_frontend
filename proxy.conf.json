@@ -12,5 +12,12 @@
     "pathRewrite": {
       "^/traffic": ""
     }
+  },
+  "/bwastr-wms": {
+    "target": "https://atlas.wsv.bund.de/bwastr/wms",
+    "secure": false,
+    "pathRewrite": {
+      "^/bwastr-wms": ""
+    }
   }
 }
